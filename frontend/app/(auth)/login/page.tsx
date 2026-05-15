@@ -243,14 +243,20 @@ export default function LoginPage() {
         </motion.div>
 
         {/* Footer text */}
-        <motion.p
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="login-footer"
+          className="login-footer mt-8 text-center"
         >
-          Seeded demo accounts — one click and you&apos;re in.
-        </motion.p>
+          <div className="flex items-center justify-center gap-3">
+            <div className="h-[1px] w-12 bg-gradient-to-r from-transparent to-white/20" />
+            <p className="text-[13px] font-medium tracking-widest text-white/50">
+              © 2026 ValueAddSoftTech
+            </p>
+            <div className="h-[1px] w-12 bg-gradient-to-l from-transparent to-white/20" />
+          </div>
+        </motion.div>
       </div>
     </div>
   );

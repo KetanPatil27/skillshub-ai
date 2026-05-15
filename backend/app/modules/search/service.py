@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import date, timedelta
 from typing import AsyncIterator
 from uuid import UUID
 
@@ -11,6 +12,28 @@ from app.modules.employees.service import EmployeeService
 from app.modules.search.models import SearchQueryLog
 
 logger = logging.getLogger("skillshub.search")
+
+
+def _temporal_context(today: date) -> dict[str, str]:
+    return {
+        "today": today.isoformat(),
+        "last_month_start": (today - timedelta(days=30)).isoformat(),
+        "last_quarter_start": (today - timedelta(days=90)).isoformat(),
+    }
+
+
+def _augment_with_recency(candidates: list[dict], today: date) -> list[dict]:
+    """Adds `days_since_last_project_end` (int or None) to each candidate in place."""
+    for c in candidates:
+        end_iso = c.get("last_project_end_date")
+        days: int | None = None
+        if end_iso:
+            try:
+                days = (today - date.fromisoformat(end_iso)).days
+            except ValueError:
+                days = None
+        c["days_since_last_project_end"] = days
+    return candidates
 
 
 class SearchService:
@@ -28,16 +51,21 @@ class SearchService:
 
         Final event: `data: {"done": true, "count": N}`
         """
-        candidates = await self._candidates()
+        today = date.today()
+        candidates = _augment_with_recency(await self._candidates(), today)
         if not candidates:
             yield "event: done\n"
             yield 'data: {"done": true, "count": 0, "message": "No approved profiles to search."}\n\n'
             return
 
+        temporal_context = _temporal_context(today)
+
         count = 0
         top_score: int | None = None
         try:
-            async for result in ai_service.stream_search_results(query, candidates, limit):
+            async for result in ai_service.stream_search_results(
+                query, candidates, limit, temporal_context
+            ):
                 count += 1
                 if top_score is None or result.match_score > top_score:
                     top_score = result.match_score
@@ -81,8 +109,11 @@ class SearchService:
             yield line
 
     async def rank_non_streaming(self, query: str, limit: int) -> list[SearchResult]:
-        candidates = await self._candidates()
-        return await ai_service.rank_candidates_non_streaming(query, candidates, limit)
+        today = date.today()
+        candidates = _augment_with_recency(await self._candidates(), today)
+        return await ai_service.rank_candidates_non_streaming(
+            query, candidates, limit, _temporal_context(today)
+        )
 
     async def build_team(self, brief: str, team_size: int) -> TeamBuildResult:
         candidates = await self._candidates()

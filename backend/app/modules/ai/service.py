@@ -197,14 +197,17 @@ def _iter_complete_objects(buffer: str) -> tuple[list[dict], str]:
 
 
 async def stream_search_results(
-    query: str, candidates: list[dict], limit: int
+    query: str,
+    candidates: list[dict],
+    limit: int,
+    temporal_context: dict[str, str],
 ) -> AsyncIterator[SearchResult]:
     """Yields SearchResult objects one at a time as Gemini streams its JSON array.
 
     The Gemini Python SDK is synchronous; we iterate the chunks in a worker thread and
     forward parsed objects via an asyncio.Queue.
     """
-    prompt = search_v1.build_prompt(query, candidates, limit)
+    prompt = search_v1.build_prompt(query, candidates, limit, temporal_context)
     client = get_client()
 
     queue: asyncio.Queue[SearchResult | None | Exception] = asyncio.Queue()
@@ -257,12 +260,15 @@ async def stream_search_results(
 
 
 async def rank_candidates_non_streaming(
-    query: str, candidates: list[dict], limit: int
+    query: str,
+    candidates: list[dict],
+    limit: int,
+    temporal_context: dict[str, str],
 ) -> list[SearchResult]:
     """Non-streaming convenience used by the CLI script. Calls the same prompt
     and parses the full JSON array in one shot.
     """
-    prompt = search_v1.build_prompt(query, candidates, limit)
+    prompt = search_v1.build_prompt(query, candidates, limit, temporal_context)
     client = get_client()
     try:
         response = await asyncio.to_thread(
@@ -325,8 +331,13 @@ def _peek_extraction_prompt(resume_text: str) -> str:
     return extraction_v1.build_prompt(resume_text)
 
 
-def _peek_search_prompt(query: str, candidates: list[dict], limit: int) -> str:
-    return search_v1.build_prompt(query, candidates, limit)
+def _peek_search_prompt(
+    query: str,
+    candidates: list[dict],
+    limit: int,
+    temporal_context: dict[str, str],
+) -> str:
+    return search_v1.build_prompt(query, candidates, limit, temporal_context)
 
 
 def candidate_dict_from_employee(emp: dict[str, Any]) -> dict[str, Any]:

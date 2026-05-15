@@ -31,6 +31,33 @@ SkillsHub is a hackathon-grade full-stack app that solves two real HR problems:
 
 ---
 
+## Recent updates
+
+Things added since the initial commit, newest first:
+
+- **Time-aware search.** The search prompt now gets a TEMPORAL CONTEXT block
+  (today, last-month-start, last-quarter-start) and every candidate carries
+  `days_since_last_project_end`. Queries like *"haven't been on a new project in
+  the last quarter"* or *"shipped something in the last 30 days"* are now
+  interpreted correctly instead of guessed at.
+- **Paste-a-JD search.** New `POST /search/jd` endpoint. HR pastes a full job
+  description; a fast Gemini call distills it into a hiring query, then the
+  normal ranker streams results. The UI shows the distilled query as a pill so
+  you can see what the AI heard.
+- **Role-aware route guard.** The Next.js middleware now decodes the JWT (edge-
+  safe, no `jose`) and bounces wrong-role traffic with a `?notice=` query param
+  the layout reads to show a toast. Backend still re-verifies on every call —
+  the middleware is a UX guard, not a security boundary.
+- **`/auth/me` now tells the UI where to send you.** Returns
+  `has_completed_profile: bool` so a logged-in employee with no skills yet lands
+  on `/upload` and everyone else lands on `/profile`.
+- **Auth signup + rate limit.** Open employee signup and invite-coded HR signup
+  (`/auth/register/employee`, `/auth/register/hr`), with a per-minute in-memory
+  rate limiter and a redesigned login/signup page. Demo one-click logins still
+  work.
+
+---
+
 ## Architecture
 
 ```
@@ -276,6 +303,12 @@ curl -N -X POST http://localhost:8000/search \
   -H "Authorization: Bearer $TOKEN" \
   -H 'Content-Type: application/json' \
   -d '{"query":"backend dev in Pune with Java + payment gateway","limit":5}'
+
+# Search from a job description (HR only) — distills then ranks
+curl -N -X POST http://localhost:8000/search/jd \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"job_description":"We are hiring a senior backend engineer in Pune ... Java, Spring, payment gateways ...","limit":5}'
 
 # Approve a review item
 curl -X POST http://localhost:8000/review/$ITEM_ID/approve \

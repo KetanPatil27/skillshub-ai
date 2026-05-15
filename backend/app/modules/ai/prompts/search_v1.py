@@ -19,15 +19,24 @@ RANKING RULES:
    * "payment gateway" matches Razorpay, Stripe, PayU, Paytm, Square, Braintree.
    * "real-time" matches Socket.IO, WebSocket, WebRTC, server-sent events, Firebase RTDB.
    * "ML" matches PyTorch, TensorFlow, scikit-learn, Hugging Face, LangChain.
-- Interpret AVAILABILITY and TIME constraints using `allocation_status` and `last_project_end_date`:
-   * "available now", "free", "bench", "between projects" -> prefer allocation_status == UNALLOCATED.
-   * "recently shipped", "just finished", "in the last quarter" ->
-     last_project_end_date within the past 90 days.
-   * "haven't been on a new project recently", "stale", "needs a new challenge" ->
-     last_project_end_date older than 90 days OR allocation_status == UNALLOCATED.
-   * Today's date is implicit; compare last_project_end_date against it. A null
-     last_project_end_date means "currently on a project" — treat as recent.
-   * Availability is a HARD requirement when the query explicitly asks for it.
+- Interpret AVAILABILITY and TIME constraints using the TEMPORAL CONTEXT block below,
+  plus the per-candidate fields `allocation_status`, `last_project_end_date`, and
+  `days_since_last_project_end`. NEVER invent dates — use the values given.
+   * "available now", "free", "bench", "between projects" -> allocation_status == UNALLOCATED.
+   * "available next month", "free in the next 30 days", "rolling off soon" ->
+     allocation_status == UNALLOCATED is the strongest signal (we cannot see future
+     end dates). Treat as soft preference for now.
+   * "recently shipped", "just finished", "in the last quarter", "shipped this quarter" ->
+     days_since_last_project_end is not null AND 0 <= days_since_last_project_end <= 90
+     (i.e. last_project_end_date >= last_quarter_start).
+   * "haven't been on a new project in the last quarter", "stale", "needs a new challenge",
+     "due for rotation" -> days_since_last_project_end > 90 OR allocation_status == UNALLOCATED.
+     Do NOT match candidates with days_since_last_project_end == null whose
+     allocation_status == ALLOCATED — they are currently on a project, not stale.
+   * "haven't been on a project in the last month" -> days_since_last_project_end > 30
+     OR allocation_status == UNALLOCATED.
+   * Availability/recency is a HARD requirement when the query explicitly asks for it —
+     a candidate that fails it must not score above 70.
 - match_score in [0, 100]:
    * 90-100: hits every hard requirement with strong evidence and clear seniority fit.
    * 75-89:  hits every hard requirement, weaker on one nice-to-have.
@@ -58,10 +67,27 @@ OUTPUT_SCHEMA = """ELEMENT SCHEMA (one per candidate):
 """
 
 
-def build_prompt(query: str, candidates: list[dict], limit: int) -> str:
+def build_prompt(
+    query: str,
+    candidates: list[dict],
+    limit: int,
+    temporal_context: dict[str, str],
+) -> str:
     return f"""{SYSTEM_PROMPT}
 
 {OUTPUT_SCHEMA}
+
+TEMPORAL CONTEXT (anchor every time-based judgement to these dates):
+- today:               {temporal_context["today"]}
+- last_month_start:    {temporal_context["last_month_start"]}   (today - 30 days)
+- last_quarter_start:  {temporal_context["last_quarter_start"]}   (today - 90 days)
+
+Each candidate carries `days_since_last_project_end`:
+- null  -> no end date on record (either currently on a project, or unallocated indefinitely;
+           disambiguate using `allocation_status`).
+- 0-30  -> rolled off in the last month.
+- 31-90 -> rolled off in the last quarter but not the last month.
+- >90   -> hasn't shipped a new project in over a quarter (stale).
 
 HIRING QUERY:
 \"\"\"
