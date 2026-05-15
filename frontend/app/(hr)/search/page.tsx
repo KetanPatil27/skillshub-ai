@@ -1,0 +1,238 @@
+"use client";
+
+import { AnimatePresence, motion } from "framer-motion";
+import { Loader2, Search as SearchIcon, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+import { EmployeeSheet } from "@/components/shared/employee-sheet";
+import { StreamingIndicator } from "@/components/shared/streaming-indicator";
+import { Avatar } from "@/components/shared/avatar";
+import { ResultCard } from "@/components/features/search/result-card";
+import { SearchInput } from "@/components/features/search/search-input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { useEmployees } from "@/hooks/use-employees";
+import { useSearch, useTeamBuilder } from "@/hooks/use-search";
+import { errorMessage } from "@/lib/api";
+
+export default function SearchPage() {
+  const [openId, setOpenId] = useState<string | null>(null);
+  const search = useSearch();
+  const totalProfilesQ = useEmployees({ status: "APPROVED", page_size: 1 });
+  const totalProfiles = totalProfilesQ.data?.total ?? 0;
+
+  return (
+    <div className="container max-w-5xl py-8">
+      <Tabs defaultValue="search">
+        <div className="mb-6 flex items-center justify-between">
+          <TabsList>
+            <TabsTrigger value="search" className="gap-2">
+              <SearchIcon className="h-4 w-4" /> Search
+            </TabsTrigger>
+            <TabsTrigger value="team" className="gap-2">
+              <Users className="h-4 w-4" /> Build Team
+            </TabsTrigger>
+          </TabsList>
+        </div>
+
+        <TabsContent value="search">
+          <AnimatePresence mode="wait">
+            {search.phase === "idle" && search.results.length === 0 ? (
+              <motion.section
+                key="hero"
+                exit={{ opacity: 0, y: -10 }}
+                className="flex flex-col items-center pt-16"
+              >
+                <h1 className="mb-2 text-3xl font-semibold tracking-tight">
+                  Ask SkillsHub anything.
+                </h1>
+                <p className="mb-8 max-w-xl text-center text-muted-foreground">
+                  Type a real question. We&apos;ll search {totalProfiles} approved profiles and
+                  rank them with a short reason for each.
+                </p>
+                <SearchInput
+                  hero
+                  onSubmit={(q) => search.run(q, 5)}
+                  busy={search.phase === "streaming"}
+                />
+              </motion.section>
+            ) : (
+              <motion.section
+                key="results"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="space-y-6"
+              >
+                <SearchInput
+                  onSubmit={(q) => search.run(q, 5)}
+                  busy={search.phase === "streaming"}
+                />
+
+                <div className="flex items-center gap-3">
+                  {search.phase === "streaming" && (
+                    <StreamingIndicator
+                      message={`Searching ${totalProfiles} profiles…`}
+                    />
+                  )}
+                  {search.phase === "done" && (
+                    <span className="text-sm text-muted-foreground">
+                      {search.results.length} ranked result
+                      {search.results.length === 1 ? "" : "s"}.
+                    </span>
+                  )}
+                  {search.phase === "error" && search.error && (
+                    <span className="text-sm text-destructive">{search.error}</span>
+                  )}
+                  {(search.results.length > 0 || search.phase !== "idle") && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="ml-auto"
+                      onClick={search.reset}
+                    >
+                      Clear
+                    </Button>
+                  )}
+                </div>
+
+                <div className="space-y-4">
+                  {search.results.map((r, i) => (
+                    <ResultCard
+                      key={r.employee_id + i}
+                      result={r}
+                      index={i}
+                      onOpen={(id) => setOpenId(id)}
+                    />
+                  ))}
+                  {search.phase === "done" && search.results.length === 0 && (
+                    <p className="rounded-md border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
+                      No candidates matched. Try a broader query.
+                    </p>
+                  )}
+                </div>
+              </motion.section>
+            )}
+          </AnimatePresence>
+        </TabsContent>
+
+        <TabsContent value="team">
+          <TeamBuilderTab onOpen={setOpenId} />
+        </TabsContent>
+      </Tabs>
+
+      <EmployeeSheet
+        employeeId={openId}
+        open={openId !== null}
+        onOpenChange={(v) => !v && setOpenId(null)}
+      />
+    </div>
+  );
+}
+
+function TeamBuilderTab({ onOpen }: { onOpen: (id: string) => void }) {
+  const [brief, setBrief] = useState("");
+  const [size, setSize] = useState(4);
+  const team = useTeamBuilder();
+
+  async function run() {
+    if (brief.trim().length < 5) return;
+    try {
+      await team.mutateAsync({ brief: brief.trim(), team_size: size });
+    } catch (e) {
+      toast.error(errorMessage(e));
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardContent className="space-y-3 p-5">
+          <Textarea
+            value={brief}
+            onChange={(e) => setBrief(e.target.value)}
+            placeholder="e.g. 4-person team for a 3-month healthcare app, needs mobile + backend + DevOps."
+            rows={3}
+          />
+          <div className="flex items-center gap-3">
+            <label className="text-xs text-muted-foreground">Team size</label>
+            <input
+              type="number"
+              min={2}
+              max={8}
+              value={size}
+              onChange={(e) => setSize(Math.max(2, Math.min(8, Number(e.target.value))))}
+              className="h-9 w-16 rounded-md border bg-background px-2 text-sm"
+            />
+            <Button onClick={run} disabled={team.isPending || brief.trim().length < 5} className="ml-auto">
+              {team.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Build Team
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {team.data && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-4"
+        >
+          <Card>
+            <CardContent className="p-5">
+              <h3 className="mb-2 text-sm font-semibold">Why this team</h3>
+              <p className="text-sm text-muted-foreground">{team.data.rationale}</p>
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            {team.data.team.map((m, i) => (
+              <motion.div
+                key={m.employee_id + i}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.08 }}
+              >
+                <Card
+                  className="cursor-pointer transition-shadow hover:shadow-md"
+                  onClick={() => onOpen(m.employee_id)}
+                >
+                  <CardContent className="flex gap-3 p-4">
+                    <Avatar name={m.name} size={40} />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold">{m.name}</span>
+                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+                          {m.role_on_team}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-sm text-muted-foreground">{m.why_picked}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+
+          {team.data.alternates.length > 0 && (
+            <Card>
+              <CardContent className="p-5">
+                <h3 className="mb-2 text-sm font-semibold">Alternates</h3>
+                <ul className="space-y-1 text-sm text-muted-foreground">
+                  {team.data.alternates.map((a) => (
+                    <li key={a.employee_id}>
+                      <span className="font-medium text-foreground">{a.name}</span> — would
+                      replace {a.would_replace}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          )}
+        </motion.div>
+      )}
+    </div>
+  );
+}

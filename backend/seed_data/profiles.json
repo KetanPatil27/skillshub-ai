@@ -1,0 +1,548 @@
+[
+  {
+    "full_name": "Ravi Sharma",
+    "headline": "Senior Frontend Engineer",
+    "location": "Pune",
+    "years_experience": 9,
+    "allocation_status": "ALLOCATED",
+    "last_project_end_date": null,
+    "bio": "Frontend specialist focused on payment UX. Led the customer-facing checkout for two Razorpay integrations.",
+    "is_demo_employee": true,
+    "skills": [
+      {"name": "React", "category": "FRAMEWORK", "proficiency": "EXPERT", "years_experience": 8, "evidence": "Architected the checkout SPA in React 18."},
+      {"name": "Next.js", "category": "FRAMEWORK", "proficiency": "EXPERT", "years_experience": 5, "evidence": "Owned the Next.js migration for the customer portal."},
+      {"name": "TypeScript", "category": "LANGUAGE", "proficiency": "EXPERT", "years_experience": 6, "evidence": "All code is strict TypeScript."},
+      {"name": "Tailwind CSS", "category": "FRAMEWORK", "proficiency": "EXPERT", "years_experience": 4, "evidence": "Designed the company-wide Tailwind design system."},
+      {"name": "Razorpay", "category": "PLATFORM", "proficiency": "EXPERT", "years_experience": 4, "evidence": "Owned two Razorpay payment-gateway integrations end-to-end."},
+      {"name": "JavaScript", "category": "LANGUAGE", "proficiency": "EXPERT", "years_experience": 9, "evidence": "Career-long JS use.", "is_inferred": true, "inference_confidence": 0.98, "inference_reason": "TypeScript + Next.js for 6+ years implies expert JS."},
+      {"name": "HTML", "category": "LANGUAGE", "proficiency": "EXPERT", "years_experience": 9, "evidence": "Implied by 9 years frontend work.", "is_inferred": true, "inference_confidence": 0.95, "inference_reason": "Senior frontend role implies fluent HTML."},
+      {"name": "CSS", "category": "LANGUAGE", "proficiency": "EXPERT", "years_experience": 9, "evidence": "Implied by Tailwind expertise.", "is_inferred": true, "inference_confidence": 0.94, "inference_reason": "Built a Tailwind design system."},
+      {"name": "Fintech", "category": "DOMAIN", "proficiency": "EXPERT", "years_experience": 4, "evidence": "Multiple payment-gateway projects."},
+      {"name": "Figma", "category": "TOOL", "proficiency": "INTERMEDIATE", "years_experience": 3, "evidence": "Collaborated with designers via Figma handoff."}
+    ],
+    "projects": [
+      {
+        "title": "PayWave Checkout 2.0",
+        "description": "Redesigned the multi-step checkout to lift conversion 18%. Integrated Razorpay Standard Checkout and Subscriptions APIs.",
+        "role": "Tech Lead",
+        "domain": "Fintech",
+        "start_date": "2024-02-01",
+        "end_date": null,
+        "tech_stack": ["Next.js", "React", "TypeScript", "Tailwind CSS", "Razorpay"]
+      },
+      {
+        "title": "Merchant Onboarding Portal",
+        "description": "Built the merchant KYC and dashboard frontend, handling 5k+ daily signups.",
+        "role": "Senior Frontend Engineer",
+        "domain": "Fintech",
+        "start_date": "2022-06-01",
+        "end_date": "2023-12-01",
+        "tech_stack": ["Next.js", "React", "TypeScript", "Tailwind CSS", "Razorpay"]
+      }
+    ]
+  },
+  {
+    "full_name": "Priya Singh",
+    "headline": "Senior Backend Engineer",
+    "location": "Pune",
+    "years_experience": 8,
+    "allocation_status": "ALLOCATED",
+    "last_project_end_date": null,
+    "bio": "Java/Spring engineer with deep payment-gateway and high-throughput API experience.",
+    "skills": [
+      {"name": "Java", "category": "LANGUAGE", "proficiency": "EXPERT", "years_experience": 8, "evidence": "8 years Java; led Spring Boot microservices for FinPay."},
+      {"name": "Spring Boot", "category": "FRAMEWORK", "proficiency": "EXPERT", "years_experience": 7, "evidence": "Architected payment microservices in Spring Boot."},
+      {"name": "PostgreSQL", "category": "PLATFORM", "proficiency": "EXPERT", "years_experience": 6, "evidence": "Owned the multi-tenant Postgres schema."},
+      {"name": "Stripe", "category": "PLATFORM", "proficiency": "EXPERT", "years_experience": 3, "evidence": "Built Stripe Connect onboarding for marketplaces."},
+      {"name": "Razorpay", "category": "PLATFORM", "proficiency": "INTERMEDIATE", "years_experience": 2, "evidence": "Integrated Razorpay payouts for vendor settlements."},
+      {"name": "Kafka", "category": "PLATFORM", "proficiency": "INTERMEDIATE", "years_experience": 3, "evidence": "Used Kafka for settlement event streaming."},
+      {"name": "Docker", "category": "PLATFORM", "proficiency": "INTERMEDIATE", "years_experience": 5, "evidence": "All services Dockerised."},
+      {"name": "AWS", "category": "PLATFORM", "proficiency": "INTERMEDIATE", "years_experience": 4, "evidence": "Deployed services to ECS Fargate."},
+      {"name": "Fintech", "category": "DOMAIN", "proficiency": "EXPERT", "years_experience": 5, "evidence": "Two fintech companies, payment domain."},
+      {"name": "JUnit", "category": "TOOL", "proficiency": "EXPERT", "years_experience": 7, "evidence": "Maintained 80%+ test coverage with JUnit."}
+    ],
+    "projects": [
+      {
+        "title": "Stripe Connect Marketplace",
+        "description": "Designed the marketplace payments microservice handling 200K transactions/day on Stripe Connect.",
+        "role": "Tech Lead",
+        "domain": "Fintech",
+        "start_date": "2023-04-01",
+        "end_date": null,
+        "tech_stack": ["Java", "Spring Boot", "PostgreSQL", "Stripe", "Kafka", "Docker", "AWS"]
+      },
+      {
+        "title": "Vendor Settlement Engine",
+        "description": "Built the reconciliation and payout engine using Razorpay X for B2B settlements.",
+        "role": "Senior Backend Engineer",
+        "domain": "Fintech",
+        "start_date": "2021-08-01",
+        "end_date": "2023-03-31",
+        "tech_stack": ["Java", "Spring Boot", "PostgreSQL", "Razorpay", "Kafka"]
+      }
+    ]
+  },
+  {
+    "full_name": "Arjun Patel",
+    "headline": "Backend Engineer",
+    "location": "Pune",
+    "years_experience": 5,
+    "allocation_status": "UNALLOCATED",
+    "last_project_end_date": "2026-03-01",
+    "bio": "Java backend engineer with Razorpay and Spring Boot expertise.",
+    "skills": [
+      {"name": "Java", "category": "LANGUAGE", "proficiency": "EXPERT", "years_experience": 5, "evidence": "Career-long Java work on Spring Boot services."},
+      {"name": "Spring Boot", "category": "FRAMEWORK", "proficiency": "EXPERT", "years_experience": 5, "evidence": "Built three microservices in Spring Boot."},
+      {"name": "Razorpay", "category": "PLATFORM", "proficiency": "EXPERT", "years_experience": 3, "evidence": "Owned the subscription-billing Razorpay integration."},
+      {"name": "PostgreSQL", "category": "PLATFORM", "proficiency": "INTERMEDIATE", "years_experience": 4, "evidence": "Designed schemas for the subscription service."},
+      {"name": "Redis", "category": "PLATFORM", "proficiency": "INTERMEDIATE", "years_experience": 2, "evidence": "Caching webhook idempotency keys in Redis."},
+      {"name": "Docker", "category": "PLATFORM", "proficiency": "INTERMEDIATE", "years_experience": 3, "evidence": "Containerised all services."},
+      {"name": "REST APIs", "category": "DOMAIN", "proficiency": "EXPERT", "years_experience": 5, "evidence": "Built dozens of REST endpoints."},
+      {"name": "Fintech", "category": "DOMAIN", "proficiency": "INTERMEDIATE", "years_experience": 3, "evidence": "Subscription-billing platform for EdTech."}
+    ],
+    "projects": [
+      {
+        "title": "Subscription Billing Platform",
+        "description": "Designed the recurring billing service integrating Razorpay Subscriptions with retry and dunning logic.",
+        "role": "Backend Engineer",
+        "domain": "Fintech",
+        "start_date": "2023-01-01",
+        "end_date": "2026-03-01",
+        "tech_stack": ["Java", "Spring Boot", "PostgreSQL", "Razorpay", "Redis", "Docker"]
+      },
+      {
+        "title": "Notifications Microservice",
+        "description": "Email + SMS fan-out service consumed via REST and queued via RabbitMQ.",
+        "role": "Backend Engineer",
+        "domain": "Platform",
+        "start_date": "2021-07-01",
+        "end_date": "2022-12-01",
+        "tech_stack": ["Java", "Spring Boot", "RabbitMQ"]
+      }
+    ]
+  },
+  {
+    "full_name": "Sneha Iyer",
+    "headline": "Fullstack Engineer",
+    "location": "Bangalore",
+    "years_experience": 4,
+    "allocation_status": "PARTIAL",
+    "last_project_end_date": null,
+    "bio": "Fullstack engineer with real-time and healthcare app experience.",
+    "skills": [
+      {"name": "React", "category": "FRAMEWORK", "proficiency": "EXPERT", "years_experience": 4, "evidence": "Built React frontends for telemedicine platform."},
+      {"name": "TypeScript", "category": "LANGUAGE", "proficiency": "EXPERT", "years_experience": 4, "evidence": "All code in TypeScript."},
+      {"name": "Node.js", "category": "PLATFORM", "proficiency": "EXPERT", "years_experience": 4, "evidence": "Built Node.js services for video signalling."},
+      {"name": "Express", "category": "FRAMEWORK", "proficiency": "EXPERT", "years_experience": 3, "evidence": "API gateway in Express."},
+      {"name": "Socket.IO", "category": "PLATFORM", "proficiency": "EXPERT", "years_experience": 2, "evidence": "Real-time signalling layer for telemedicine."},
+      {"name": "WebSocket", "category": "PLATFORM", "proficiency": "EXPERT", "years_experience": 2, "evidence": "Wrote raw WebSocket fallback for legacy browsers."},
+      {"name": "MongoDB", "category": "PLATFORM", "proficiency": "INTERMEDIATE", "years_experience": 3, "evidence": "Patient-record store."},
+      {"name": "Healthcare", "category": "DOMAIN", "proficiency": "INTERMEDIATE", "years_experience": 3, "evidence": "Telemedicine platform domain."},
+      {"name": "WebRTC", "category": "PLATFORM", "proficiency": "INTERMEDIATE", "years_experience": 2, "evidence": "Built browser-to-browser video calls."}
+    ],
+    "projects": [
+      {
+        "title": "TeleHealth Live Consult",
+        "description": "Built the real-time consultation product: WebRTC video + Socket.IO chat + queueing.",
+        "role": "Senior Fullstack Engineer",
+        "domain": "Healthcare",
+        "start_date": "2024-02-01",
+        "end_date": null,
+        "tech_stack": ["React", "TypeScript", "Node.js", "Express", "Socket.IO", "WebRTC", "MongoDB"]
+      },
+      {
+        "title": "Patient Self-Service Portal",
+        "description": "React + Node patient portal with appointment booking.",
+        "role": "Fullstack Engineer",
+        "domain": "Healthcare",
+        "start_date": "2022-03-01",
+        "end_date": "2023-12-01",
+        "tech_stack": ["React", "Node.js", "Express", "MongoDB"]
+      }
+    ]
+  },
+  {
+    "full_name": "Vikram Kulkarni",
+    "headline": "Senior Frontend Engineer",
+    "location": "Pune",
+    "years_experience": 8,
+    "allocation_status": "UNALLOCATED",
+    "last_project_end_date": "2026-01-15",
+    "bio": "Senior frontend engineer with deep React and e-commerce expertise. Currently between projects.",
+    "skills": [
+      {"name": "React", "category": "FRAMEWORK", "proficiency": "EXPERT", "years_experience": 8, "evidence": "8 years building large React SPAs."},
+      {"name": "Next.js", "category": "FRAMEWORK", "proficiency": "EXPERT", "years_experience": 4, "evidence": "Led the migration from CRA to Next.js."},
+      {"name": "TypeScript", "category": "LANGUAGE", "proficiency": "EXPERT", "years_experience": 6, "evidence": "Migrated 200k LOC to TypeScript."},
+      {"name": "Redux", "category": "FRAMEWORK", "proficiency": "EXPERT", "years_experience": 6, "evidence": "Owned the Redux Toolkit refactor."},
+      {"name": "Webpack", "category": "TOOL", "proficiency": "EXPERT", "years_experience": 5, "evidence": "Custom Webpack 5 build pipeline."},
+      {"name": "GraphQL", "category": "PLATFORM", "proficiency": "INTERMEDIATE", "years_experience": 3, "evidence": "Apollo Client integration."},
+      {"name": "E-commerce", "category": "DOMAIN", "proficiency": "EXPERT", "years_experience": 5, "evidence": "Marketplace and storefronts."},
+      {"name": "Storybook", "category": "TOOL", "proficiency": "EXPERT", "years_experience": 4, "evidence": "Built the company design-system Storybook."}
+    ],
+    "projects": [
+      {
+        "title": "Storefront Platform Redesign",
+        "description": "Led a 5-engineer team to migrate the storefront from CRA to Next.js with SSR.",
+        "role": "Tech Lead",
+        "domain": "E-commerce",
+        "start_date": "2023-04-01",
+        "end_date": "2026-01-15",
+        "tech_stack": ["Next.js", "React", "TypeScript", "Redux", "GraphQL", "Webpack"]
+      },
+      {
+        "title": "Design System & Storybook",
+        "description": "Built a reusable React component library with Storybook docs and visual regression.",
+        "role": "Senior Frontend Engineer",
+        "domain": "Platform",
+        "start_date": "2021-09-01",
+        "end_date": "2023-03-01",
+        "tech_stack": ["React", "TypeScript", "Storybook"]
+      }
+    ]
+  },
+  {
+    "full_name": "Anjali Reddy",
+    "headline": "Principal Backend Engineer",
+    "location": "Hyderabad",
+    "years_experience": 9,
+    "allocation_status": "ALLOCATED",
+    "last_project_end_date": null,
+    "bio": "Principal engineer specialising in scalable Python services and event-driven systems.",
+    "skills": [
+      {"name": "Python", "category": "LANGUAGE", "proficiency": "EXPERT", "years_experience": 9, "evidence": "Career-long Python."},
+      {"name": "FastAPI", "category": "FRAMEWORK", "proficiency": "EXPERT", "years_experience": 4, "evidence": "Architected the HL7 ingest service in FastAPI."},
+      {"name": "Django", "category": "FRAMEWORK", "proficiency": "EXPERT", "years_experience": 6, "evidence": "Built the patient-records monolith in Django."},
+      {"name": "Kafka", "category": "PLATFORM", "proficiency": "EXPERT", "years_experience": 5, "evidence": "Owned the Kafka cluster for clinical events."},
+      {"name": "PostgreSQL", "category": "PLATFORM", "proficiency": "EXPERT", "years_experience": 8, "evidence": "Complex partitioned tables and replication."},
+      {"name": "Redis", "category": "PLATFORM", "proficiency": "EXPERT", "years_experience": 5, "evidence": "Cache and rate-limit layer."},
+      {"name": "Healthcare", "category": "DOMAIN", "proficiency": "EXPERT", "years_experience": 6, "evidence": "HL7/FHIR clinical data pipelines."},
+      {"name": "HL7/FHIR", "category": "DOMAIN", "proficiency": "EXPERT", "years_experience": 4, "evidence": "Wrote the HL7v2 parser used in production."},
+      {"name": "Docker", "category": "PLATFORM", "proficiency": "EXPERT", "years_experience": 6, "evidence": "All services Dockerised."},
+      {"name": "GCP", "category": "PLATFORM", "proficiency": "INTERMEDIATE", "years_experience": 3, "evidence": "Deployed on GKE."}
+    ],
+    "projects": [
+      {
+        "title": "Clinical Data Ingest Platform",
+        "description": "Architected the HL7/FHIR ingest service processing 10M clinical events/day.",
+        "role": "Principal Engineer",
+        "domain": "Healthcare",
+        "start_date": "2023-01-01",
+        "end_date": null,
+        "tech_stack": ["Python", "FastAPI", "Kafka", "PostgreSQL", "Redis", "Docker", "GCP"]
+      },
+      {
+        "title": "Patient Records Monolith",
+        "description": "Owned the Django monolith managing 8M patient records.",
+        "role": "Tech Lead",
+        "domain": "Healthcare",
+        "start_date": "2019-04-01",
+        "end_date": "2022-12-01",
+        "tech_stack": ["Python", "Django", "PostgreSQL", "Redis"]
+      }
+    ]
+  },
+  {
+    "full_name": "Karthik Menon",
+    "headline": "Fullstack Engineer",
+    "location": "Bangalore",
+    "years_experience": 6,
+    "allocation_status": "ALLOCATED",
+    "last_project_end_date": null,
+    "bio": "Fullstack engineer who has shipped two real-time edtech products.",
+    "skills": [
+      {"name": "React", "category": "FRAMEWORK", "proficiency": "EXPERT", "years_experience": 6, "evidence": "Built two large React SPAs for edtech."},
+      {"name": "Node.js", "category": "PLATFORM", "proficiency": "EXPERT", "years_experience": 6, "evidence": "Node services with NestJS."},
+      {"name": "NestJS", "category": "FRAMEWORK", "proficiency": "EXPERT", "years_experience": 3, "evidence": "Owned the NestJS API gateway."},
+      {"name": "Socket.IO", "category": "PLATFORM", "proficiency": "EXPERT", "years_experience": 4, "evidence": "Built the real-time classroom signalling."},
+      {"name": "WebSocket", "category": "PLATFORM", "proficiency": "EXPERT", "years_experience": 4, "evidence": "Owned the WS layer for live classes."},
+      {"name": "TypeScript", "category": "LANGUAGE", "proficiency": "EXPERT", "years_experience": 5, "evidence": "All code is TS."},
+      {"name": "MongoDB", "category": "PLATFORM", "proficiency": "INTERMEDIATE", "years_experience": 4, "evidence": "Primary store for sessions."},
+      {"name": "Edtech", "category": "DOMAIN", "proficiency": "EXPERT", "years_experience": 6, "evidence": "6 years building learning platforms."},
+      {"name": "AWS", "category": "PLATFORM", "proficiency": "INTERMEDIATE", "years_experience": 4, "evidence": "ECS + S3 + CloudFront."},
+      {"name": "Redis", "category": "PLATFORM", "proficiency": "INTERMEDIATE", "years_experience": 3, "evidence": "Presence channel storage."}
+    ],
+    "projects": [
+      {
+        "title": "Live Classroom",
+        "description": "Real-time virtual classroom with Socket.IO presence, whiteboard, and breakout rooms.",
+        "role": "Lead Fullstack Engineer",
+        "domain": "Edtech",
+        "start_date": "2023-08-01",
+        "end_date": null,
+        "tech_stack": ["React", "TypeScript", "NestJS", "Node.js", "Socket.IO", "MongoDB", "Redis"]
+      },
+      {
+        "title": "Quiz Builder",
+        "description": "Authoring tool with collaborative editing over WebSocket.",
+        "role": "Fullstack Engineer",
+        "domain": "Edtech",
+        "start_date": "2020-06-01",
+        "end_date": "2023-07-01",
+        "tech_stack": ["React", "Node.js", "Express", "WebSocket", "MongoDB"]
+      }
+    ]
+  },
+  {
+    "full_name": "Megha Joshi",
+    "headline": "Mobile Engineer (React Native)",
+    "location": "Hyderabad",
+    "years_experience": 2.5,
+    "allocation_status": "UNALLOCATED",
+    "last_project_end_date": "2026-04-15",
+    "bio": "React Native engineer focused on healthcare apps with offline-first data sync.",
+    "skills": [
+      {"name": "React Native", "category": "FRAMEWORK", "proficiency": "EXPERT", "years_experience": 2.5, "evidence": "Two production RN apps."},
+      {"name": "TypeScript", "category": "LANGUAGE", "proficiency": "INTERMEDIATE", "years_experience": 2, "evidence": "All RN code in TS."},
+      {"name": "React", "category": "FRAMEWORK", "proficiency": "INTERMEDIATE", "years_experience": 2, "evidence": "React for web admin."},
+      {"name": "Firebase", "category": "PLATFORM", "proficiency": "INTERMEDIATE", "years_experience": 2, "evidence": "Auth + Firestore offline sync."},
+      {"name": "Redux", "category": "FRAMEWORK", "proficiency": "INTERMEDIATE", "years_experience": 2, "evidence": "Redux Toolkit + RTK Query."},
+      {"name": "Healthcare", "category": "DOMAIN", "proficiency": "INTERMEDIATE", "years_experience": 2, "evidence": "Two healthcare RN apps."},
+      {"name": "Expo", "category": "TOOL", "proficiency": "INTERMEDIATE", "years_experience": 2, "evidence": "Expo managed workflow."}
+    ],
+    "projects": [
+      {
+        "title": "MedTrack Mobile",
+        "description": "Patient medication-tracking app with offline-first Firestore sync.",
+        "role": "Mobile Engineer",
+        "domain": "Healthcare",
+        "start_date": "2024-09-01",
+        "end_date": "2026-04-15",
+        "tech_stack": ["React Native", "TypeScript", "Firebase", "Redux", "Expo"]
+      }
+    ]
+  },
+  {
+    "full_name": "Rahul Verma",
+    "headline": "Senior DevOps Engineer",
+    "location": "Remote",
+    "years_experience": 6,
+    "allocation_status": "ALLOCATED",
+    "last_project_end_date": null,
+    "bio": "DevOps engineer focused on Kubernetes platforms and CI/CD at scale for logistics workloads.",
+    "skills": [
+      {"name": "Kubernetes", "category": "PLATFORM", "proficiency": "EXPERT", "years_experience": 5, "evidence": "Production EKS clusters."},
+      {"name": "Docker", "category": "PLATFORM", "proficiency": "EXPERT", "years_experience": 6, "evidence": "Containerised every service."},
+      {"name": "AWS", "category": "PLATFORM", "proficiency": "EXPERT", "years_experience": 6, "evidence": "EKS, ECS, RDS, S3, CloudFront."},
+      {"name": "Terraform", "category": "TOOL", "proficiency": "EXPERT", "years_experience": 4, "evidence": "All infra managed in Terraform."},
+      {"name": "Helm", "category": "TOOL", "proficiency": "EXPERT", "years_experience": 4, "evidence": "Helm charts for every service."},
+      {"name": "GitHub Actions", "category": "TOOL", "proficiency": "EXPERT", "years_experience": 3, "evidence": "Owned CI/CD pipelines."},
+      {"name": "Prometheus", "category": "PLATFORM", "proficiency": "EXPERT", "years_experience": 4, "evidence": "Metrics + alerting stack."},
+      {"name": "Grafana", "category": "TOOL", "proficiency": "EXPERT", "years_experience": 4, "evidence": "Dashboards for SREs."},
+      {"name": "Python", "category": "LANGUAGE", "proficiency": "INTERMEDIATE", "years_experience": 4, "evidence": "Automation scripts."},
+      {"name": "Logistics", "category": "DOMAIN", "proficiency": "INTERMEDIATE", "years_experience": 3, "evidence": "Fleet-management workloads."}
+    ],
+    "projects": [
+      {
+        "title": "Fleet Platform Infrastructure",
+        "description": "Owned the Kubernetes platform supporting 40 microservices for a fleet-management product.",
+        "role": "Senior DevOps Engineer",
+        "domain": "Logistics",
+        "start_date": "2022-11-01",
+        "end_date": null,
+        "tech_stack": ["Kubernetes", "Docker", "AWS", "Terraform", "Helm", "Prometheus", "Grafana", "GitHub Actions"]
+      }
+    ]
+  },
+  {
+    "full_name": "Aisha Khan",
+    "headline": "Frontend Engineer",
+    "location": "Bangalore",
+    "years_experience": 2,
+    "allocation_status": "UNALLOCATED",
+    "last_project_end_date": "2026-02-10",
+    "bio": "Frontend engineer with two years of React + TypeScript on e-commerce SPAs.",
+    "skills": [
+      {"name": "React", "category": "FRAMEWORK", "proficiency": "INTERMEDIATE", "years_experience": 2, "evidence": "Two production React apps."},
+      {"name": "TypeScript", "category": "LANGUAGE", "proficiency": "INTERMEDIATE", "years_experience": 2, "evidence": "All code in TS."},
+      {"name": "Tailwind CSS", "category": "FRAMEWORK", "proficiency": "INTERMEDIATE", "years_experience": 1.5, "evidence": "Used across both projects."},
+      {"name": "Next.js", "category": "FRAMEWORK", "proficiency": "NOVICE", "years_experience": 1, "evidence": "One small Next.js project."},
+      {"name": "E-commerce", "category": "DOMAIN", "proficiency": "INTERMEDIATE", "years_experience": 2, "evidence": "Storefront work."},
+      {"name": "Vite", "category": "TOOL", "proficiency": "INTERMEDIATE", "years_experience": 1.5, "evidence": "Vite-based SPAs."}
+    ],
+    "projects": [
+      {
+        "title": "Boutique Storefront",
+        "description": "Built the responsive storefront for a fashion D2C brand.",
+        "role": "Frontend Engineer",
+        "domain": "E-commerce",
+        "start_date": "2024-08-01",
+        "end_date": "2026-02-10",
+        "tech_stack": ["React", "TypeScript", "Tailwind CSS", "Vite"]
+      }
+    ]
+  },
+  {
+    "full_name": "Aditya Nair",
+    "headline": "Fullstack Engineer",
+    "location": "Bangalore",
+    "years_experience": 4,
+    "allocation_status": "PARTIAL",
+    "last_project_end_date": null,
+    "bio": "Next.js + Node fullstack engineer with Stripe payment integration and real-time features.",
+    "skills": [
+      {"name": "Next.js", "category": "FRAMEWORK", "proficiency": "EXPERT", "years_experience": 3, "evidence": "Owned the Next.js storefront."},
+      {"name": "React", "category": "FRAMEWORK", "proficiency": "EXPERT", "years_experience": 4, "evidence": "Multiple React projects."},
+      {"name": "TypeScript", "category": "LANGUAGE", "proficiency": "EXPERT", "years_experience": 4, "evidence": "All code in TS."},
+      {"name": "Node.js", "category": "PLATFORM", "proficiency": "EXPERT", "years_experience": 4, "evidence": "Node services in TS."},
+      {"name": "Stripe", "category": "PLATFORM", "proficiency": "EXPERT", "years_experience": 2, "evidence": "Integrated Stripe Checkout + webhooks."},
+      {"name": "Socket.IO", "category": "PLATFORM", "proficiency": "INTERMEDIATE", "years_experience": 2, "evidence": "Built live-order tracking with Socket.IO."},
+      {"name": "PostgreSQL", "category": "PLATFORM", "proficiency": "INTERMEDIATE", "years_experience": 3, "evidence": "Prisma + Postgres."},
+      {"name": "Prisma", "category": "TOOL", "proficiency": "EXPERT", "years_experience": 2, "evidence": "Prisma ORM throughout."},
+      {"name": "Fintech", "category": "DOMAIN", "proficiency": "INTERMEDIATE", "years_experience": 2, "evidence": "Payments and subscription products."}
+    ],
+    "projects": [
+      {
+        "title": "Subscription Box Platform",
+        "description": "Built the Stripe-powered subscription storefront with live order-tracking over Socket.IO.",
+        "role": "Senior Fullstack Engineer",
+        "domain": "Fintech",
+        "start_date": "2024-01-01",
+        "end_date": null,
+        "tech_stack": ["Next.js", "React", "TypeScript", "Node.js", "Stripe", "Socket.IO", "PostgreSQL", "Prisma"]
+      },
+      {
+        "title": "Internal Admin Console",
+        "description": "Next.js + Prisma admin app for ops team.",
+        "role": "Fullstack Engineer",
+        "domain": "Platform",
+        "start_date": "2022-04-01",
+        "end_date": "2023-12-01",
+        "tech_stack": ["Next.js", "TypeScript", "Prisma", "PostgreSQL"]
+      }
+    ]
+  },
+  {
+    "full_name": "Neha Desai",
+    "headline": "Senior Frontend Engineer",
+    "location": "Pune",
+    "years_experience": 7,
+    "allocation_status": "UNALLOCATED",
+    "last_project_end_date": "2026-02-05",
+    "bio": "Senior frontend engineer with Vue + React + e-commerce experience. Between projects.",
+    "skills": [
+      {"name": "React", "category": "FRAMEWORK", "proficiency": "EXPERT", "years_experience": 5, "evidence": "Owned multiple React SPAs."},
+      {"name": "Vue.js", "category": "FRAMEWORK", "proficiency": "EXPERT", "years_experience": 4, "evidence": "Built Vue 3 storefronts."},
+      {"name": "TypeScript", "category": "LANGUAGE", "proficiency": "EXPERT", "years_experience": 5, "evidence": "Career-long TS."},
+      {"name": "Tailwind CSS", "category": "FRAMEWORK", "proficiency": "EXPERT", "years_experience": 4, "evidence": "Design-system level Tailwind work."},
+      {"name": "Next.js", "category": "FRAMEWORK", "proficiency": "INTERMEDIATE", "years_experience": 2, "evidence": "Two small Next.js projects."},
+      {"name": "Pinia", "category": "TOOL", "proficiency": "EXPERT", "years_experience": 3, "evidence": "Used Pinia in Vue 3 apps."},
+      {"name": "E-commerce", "category": "DOMAIN", "proficiency": "EXPERT", "years_experience": 5, "evidence": "5 years building storefronts."}
+    ],
+    "projects": [
+      {
+        "title": "Marketplace Frontend",
+        "description": "Re-architected the marketplace SPA from Vue 2 to Vue 3 + Pinia, lifting page speed by 40%.",
+        "role": "Senior Frontend Engineer",
+        "domain": "E-commerce",
+        "start_date": "2023-03-01",
+        "end_date": "2026-02-05",
+        "tech_stack": ["Vue.js", "Pinia", "TypeScript", "Tailwind CSS"]
+      },
+      {
+        "title": "B2B Checkout Flow",
+        "description": "React + Next.js checkout flow for B2B wholesale.",
+        "role": "Senior Frontend Engineer",
+        "domain": "E-commerce",
+        "start_date": "2021-05-01",
+        "end_date": "2023-02-01",
+        "tech_stack": ["React", "Next.js", "TypeScript", "Tailwind CSS"]
+      }
+    ]
+  },
+  {
+    "full_name": "Suresh Babu",
+    "headline": "Mobile Engineer (Flutter)",
+    "location": "Hyderabad",
+    "years_experience": 1.5,
+    "allocation_status": "ALLOCATED",
+    "last_project_end_date": null,
+    "bio": "Flutter mobile engineer working on logistics dispatch apps.",
+    "skills": [
+      {"name": "Flutter", "category": "FRAMEWORK", "proficiency": "INTERMEDIATE", "years_experience": 1.5, "evidence": "Two Flutter apps."},
+      {"name": "Dart", "category": "LANGUAGE", "proficiency": "INTERMEDIATE", "years_experience": 1.5, "evidence": "Dart for Flutter work."},
+      {"name": "Firebase", "category": "PLATFORM", "proficiency": "INTERMEDIATE", "years_experience": 1.5, "evidence": "Firestore + Auth."},
+      {"name": "Riverpod", "category": "TOOL", "proficiency": "INTERMEDIATE", "years_experience": 1, "evidence": "State management."},
+      {"name": "Logistics", "category": "DOMAIN", "proficiency": "INTERMEDIATE", "years_experience": 1.5, "evidence": "Dispatch app for couriers."},
+      {"name": "Google Maps SDK", "category": "PLATFORM", "proficiency": "INTERMEDIATE", "years_experience": 1, "evidence": "Routing for delivery agents."}
+    ],
+    "projects": [
+      {
+        "title": "Courier Dispatch App",
+        "description": "Flutter app for delivery couriers with live routing and proof-of-delivery photos.",
+        "role": "Mobile Engineer",
+        "domain": "Logistics",
+        "start_date": "2024-11-01",
+        "end_date": null,
+        "tech_stack": ["Flutter", "Dart", "Firebase", "Riverpod", "Google Maps SDK"]
+      }
+    ]
+  },
+  {
+    "full_name": "Pooja Iyer",
+    "headline": "ML Engineer",
+    "location": "Bangalore",
+    "years_experience": 5,
+    "allocation_status": "ALLOCATED",
+    "last_project_end_date": null,
+    "bio": "ML engineer focused on clinical NLP and medical imaging models.",
+    "skills": [
+      {"name": "Python", "category": "LANGUAGE", "proficiency": "EXPERT", "years_experience": 5, "evidence": "Career-long Python."},
+      {"name": "PyTorch", "category": "FRAMEWORK", "proficiency": "EXPERT", "years_experience": 4, "evidence": "Trained 5+ production models."},
+      {"name": "scikit-learn", "category": "FRAMEWORK", "proficiency": "EXPERT", "years_experience": 5, "evidence": "Classical ML pipelines."},
+      {"name": "Hugging Face", "category": "PLATFORM", "proficiency": "EXPERT", "years_experience": 3, "evidence": "Fine-tuned medical BERTs."},
+      {"name": "FastAPI", "category": "FRAMEWORK", "proficiency": "INTERMEDIATE", "years_experience": 3, "evidence": "Wraps models in FastAPI."},
+      {"name": "Pandas", "category": "TOOL", "proficiency": "EXPERT", "years_experience": 5, "evidence": "Daily Pandas use."},
+      {"name": "MLOps", "category": "DOMAIN", "proficiency": "INTERMEDIATE", "years_experience": 3, "evidence": "MLflow + DVC pipelines."},
+      {"name": "Healthcare", "category": "DOMAIN", "proficiency": "EXPERT", "years_experience": 4, "evidence": "Clinical NLP and imaging."},
+      {"name": "LangChain", "category": "FRAMEWORK", "proficiency": "INTERMEDIATE", "years_experience": 1, "evidence": "RAG over clinical guidelines."}
+    ],
+    "projects": [
+      {
+        "title": "Clinical NER Model",
+        "description": "Fine-tuned BioBERT for medication and dosage extraction from clinical notes.",
+        "role": "ML Engineer",
+        "domain": "Healthcare",
+        "start_date": "2023-06-01",
+        "end_date": null,
+        "tech_stack": ["Python", "PyTorch", "Hugging Face", "FastAPI", "Pandas"]
+      },
+      {
+        "title": "Clinical Guidelines RAG",
+        "description": "RAG assistant over clinical guidelines for doctors.",
+        "role": "ML Engineer",
+        "domain": "Healthcare",
+        "start_date": "2024-03-01",
+        "end_date": null,
+        "tech_stack": ["Python", "LangChain", "Hugging Face", "FastAPI"]
+      }
+    ]
+  },
+  {
+    "full_name": "Manish Gupta",
+    "headline": "Cloud Engineer",
+    "location": "Remote",
+    "years_experience": 2.5,
+    "allocation_status": "UNALLOCATED",
+    "last_project_end_date": "2026-03-20",
+    "bio": "Junior cloud engineer with AWS + Docker + CI/CD experience.",
+    "skills": [
+      {"name": "AWS", "category": "PLATFORM", "proficiency": "INTERMEDIATE", "years_experience": 2.5, "evidence": "EC2, S3, Lambda, RDS."},
+      {"name": "Docker", "category": "PLATFORM", "proficiency": "INTERMEDIATE", "years_experience": 2, "evidence": "Containerised services."},
+      {"name": "GitHub Actions", "category": "TOOL", "proficiency": "INTERMEDIATE", "years_experience": 2, "evidence": "Set up CI/CD pipelines."},
+      {"name": "Python", "category": "LANGUAGE", "proficiency": "INTERMEDIATE", "years_experience": 2, "evidence": "Automation scripts."},
+      {"name": "Terraform", "category": "TOOL", "proficiency": "NOVICE", "years_experience": 1, "evidence": "Wrote some Terraform modules."},
+      {"name": "Bash", "category": "LANGUAGE", "proficiency": "INTERMEDIATE", "years_experience": 2.5, "evidence": "Bash scripts daily."}
+    ],
+    "projects": [
+      {
+        "title": "Internal SaaS Deployment Pipeline",
+        "description": "Set up GitHub Actions + AWS ECS deploys for a B2B SaaS product.",
+        "role": "Cloud Engineer",
+        "domain": "Platform",
+        "start_date": "2024-04-01",
+        "end_date": "2026-03-20",
+        "tech_stack": ["AWS", "Docker", "GitHub Actions", "Terraform"]
+      }
+    ]
+  }
+]

@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+.turbo/
+
+# Env
+.env
+.env.local
+.env.*.local
+!.env.example
+!.env.local.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Coverage
+coverage/
+.coverage
+htmlcov/
+
+# Uploads (local dev)
+backend/uploads/
+backend/seed_data/resumes/*.pdf
+
+# Alembic local sqlite
+*.db
+*.sqlite
+*.sqlite3
