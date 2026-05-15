@@ -6,6 +6,62 @@ export const loginSchema = z.object({
 });
 export type LoginValues = z.infer<typeof loginSchema>;
 
+// ─── Signup ───────────────────────────────────────────────
+
+export const passwordSchema = z
+  .string()
+  .min(8, "At least 8 characters")
+  .max(128, "Too long")
+  .regex(/[a-zA-Z]/, "Must contain a letter")
+  .regex(/\d/, "Must contain a number");
+
+/** Score 0–3 — number of password rules satisfied. Used by the strength indicator. */
+export function scorePassword(p: string): 0 | 1 | 2 | 3 {
+  let s = 0;
+  if (p.length >= 8) s++;
+  if (/[a-zA-Z]/.test(p)) s++;
+  if (/\d/.test(p)) s++;
+  return s as 0 | 1 | 2 | 3;
+}
+
+export const employeeSignupSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(1, "Name is required")
+      .max(50, "Too long"),
+    email: z.string().email("Enter a valid email"),
+    password: passwordSchema,
+    confirm_password: z.string(),
+    terms: z.literal(true, {
+      errorMap: () => ({ message: "You must agree to the demo terms" }),
+    }),
+  })
+  .refine((d) => d.password === d.confirm_password, {
+    message: "Passwords do not match",
+    path: ["confirm_password"],
+  });
+export type EmployeeSignupValues = z.infer<typeof employeeSignupSchema>;
+
+export const hrSignupSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(1, "Name is required")
+      .max(50, "Too long"),
+    email: z.string().email("Enter a valid email"),
+    password: passwordSchema,
+    confirm_password: z.string(),
+    invite_code: z.string().min(1, "Invite code required"),
+  })
+  .refine((d) => d.password === d.confirm_password, {
+    message: "Passwords do not match",
+    path: ["confirm_password"],
+  });
+export type HRSignupValues = z.infer<typeof hrSignupSchema>;
+
 export const profileEditSchema = z.object({
   full_name: z.string().min(1).max(100),
   headline: z.string().max(200).optional().nullable(),

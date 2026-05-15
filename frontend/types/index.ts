@@ -16,6 +16,30 @@ export interface TokenResponse {
   user: User;
 }
 
+export interface LoginResponse {
+  access_token: string;
+  token_type: "bearer";
+  expires_in: number;
+  user: User;
+  employee_id?: string | null;
+}
+
+export type NextAction = "upload_resume" | "search";
+
+export interface RegisterResponse {
+  access_token: string;
+  token_type: "bearer";
+  expires_in: number;
+  user: User;
+  employee_id?: string | null;
+  next_action: NextAction;
+}
+
+export interface MeResponse {
+  user: User;
+  employee_id?: string | null;
+}
+
 export type SkillCategory =
   | "LANGUAGE"
   | "FRAMEWORK"

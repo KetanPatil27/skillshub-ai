@@ -24,7 +24,7 @@ class UserService:
     async def create(self, payload: UserCreate) -> User:
         existing = await self.get_by_email(payload.email)
         if existing:
-            raise ConflictError("Email is already registered")
+            raise ConflictError("An account with this email already exists.")
         user = User(
             name=payload.name.strip(),
             email=payload.email.lower(),

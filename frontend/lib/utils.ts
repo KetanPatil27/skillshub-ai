@@ -59,3 +59,21 @@ export function allocationTone(s: string): { dot: string; text: string; label: s
       return { dot: "bg-zinc-400", text: "text-zinc-600 dark:text-zinc-400", label: "Allocated" };
   }
 }
+
+export function generateStrongPassword(): string {
+  const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const numbers = "0123456789";
+  const specials = "!@#$%^&*()_+~`|}{[]:;?><,./-=";
+  const all = letters + numbers + specials;
+  
+  let pwd = "";
+  pwd += letters.charAt(Math.floor(Math.random() * letters.length));
+  pwd += numbers.charAt(Math.floor(Math.random() * numbers.length));
+  pwd += specials.charAt(Math.floor(Math.random() * specials.length));
+  
+  for (let i = 0; i < 11; i++) {
+    pwd += all.charAt(Math.floor(Math.random() * all.length));
+  }
+  
+  return pwd.split('').sort(() => 0.5 - Math.random()).join('');
+}

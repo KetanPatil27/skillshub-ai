@@ -152,7 +152,84 @@ Open **http://localhost:3000**.
 | HR/ADMIN | `hr@skillshub.demo`    | `demo123` |
 | Employee | `ravi@skillshub.demo`  | `demo123` |
 
-Both are exposed as one-click buttons on the login page.
+Both are exposed as one-click buttons on the login page. They survive every
+reseed and are intended for fast judge evaluation — **do not remove them**.
+
+---
+
+## Creating accounts
+
+Real signup is available alongside the seeded demos — the one-click logins
+keep working, signup is a parallel path.
+
+### Employee signup (open self-service)
+
+`POST /auth/register/employee`
+
+```jsonc
+{
+  "name": "Asha Iyer",
+  "email": "asha@example.com",
+  "password": "Hunter2pass",      // ≥ 8 chars, ≥ 1 letter, ≥ 1 digit
+  "confirm_password": "Hunter2pass"
+}
+```
+
+Creates a `USER` account **plus** a stub Employee row in `PENDING_REVIEW`, so
+the next step is `/upload`. Response includes `next_action: "upload_resume"`
+and the new `employee_id`.
+
+### HR signup (invite-only)
+
+`POST /auth/register/hr` — same body as above plus `invite_code`:
+
+```jsonc
+{
+  "name": "Priya HR",
+  "email": "priya.hr@example.com",
+  "password": "Hunter2pass",
+  "confirm_password": "Hunter2pass",
+  "invite_code": "SKILLSHUB-HR-2026"   // value of HR_INVITE_CODE in .env
+}
+```
+
+The demo code is `SKILLSHUB-HR-2026` (override via `HR_INVITE_CODE`). Wrong
+code returns 403 with a generic *"Invalid invite code."* message — judges who
+want to create their own HR account during evaluation can use the env value.
+
+### Feature flags
+
+Both signup endpoints can be disabled per-environment:
+
+```bash
+ALLOW_EMPLOYEE_SIGNUP=false
+ALLOW_HR_SIGNUP=false
+PASSWORD_MIN_LENGTH=8
+AUTH_RATE_LIMIT_PER_MINUTE=10   # 0 disables; in-memory, per worker
+```
+
+Disabled endpoints return 403 with *"Signup is currently disabled. Please
+contact your administrator."*
+
+### Other auth endpoints
+
+- `POST /auth/login` — returns `{ access_token, user, employee_id? }`.
+  Wrong credentials always return 401 with the generic message
+  *"Invalid email or password."* (no distinction between unknown email and
+  wrong password).
+- `GET /auth/me` — current user + `employee_id` if applicable. Used by the
+  frontend to rehydrate session on refresh.
+
+### Running the auth tests
+
+```bash
+cd backend
+pytest tests/test_auth.py -v
+```
+
+Tests use unique per-run emails (UUID prefix) and hit the configured
+`DATABASE_URL`; they don't clean up after themselves. Point at a throwaway
+schema if you want isolation.
 
 ---
 

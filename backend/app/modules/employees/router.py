@@ -48,7 +48,7 @@ async def list_employees(
     db: DbSession,
     f: Annotated[EmployeeFilter, Depends(_filter_dep)],
 ) -> EmployeeListResponse:
-    rows, total = await EmployeeService(db).list(f)
+    rows, total = await EmployeeService(db).list_page(f)
     items = [
         EmployeeListItem(
             id=e.id,

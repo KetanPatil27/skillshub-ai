@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any
 from uuid import UUID
 
@@ -51,7 +53,7 @@ class EmployeeService:
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def list(self, f: EmployeeFilter) -> tuple[list[Employee], int]:
+    async def list_page(self, f: EmployeeFilter) -> tuple[list[Employee], int]:
         base = select(Employee).options(
             selectinload(Employee.skills), selectinload(Employee.projects)
         )

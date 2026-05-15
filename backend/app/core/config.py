@@ -41,6 +41,15 @@ class Settings(BaseSettings):
     SEED_EMP_EMAIL: str = "ravi@skillshub.demo"
     SEED_EMP_PASSWORD: str = "demo123"
 
+    # Account creation
+    HR_INVITE_CODE: str = "SKILLSHUB-HR-2026"
+    ALLOW_EMPLOYEE_SIGNUP: bool = True
+    ALLOW_HR_SIGNUP: bool = True
+    PASSWORD_MIN_LENGTH: int = 8
+
+    # Auth rate limiting (per IP, sliding minute window)
+    AUTH_RATE_LIMIT_PER_MINUTE: int = 10
+
     @field_validator("CORS_ORIGINS")
     @classmethod
     def _strip_origins(cls, v: str) -> str:
