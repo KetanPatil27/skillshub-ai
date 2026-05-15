@@ -20,6 +20,7 @@ from app.modules.employees.models import (
     AllocationStatus,
     Employee,
     ProfileStatus,
+    Skill,
 )
 from app.modules.users.models import User, UserRole
 from app.modules.users.schemas import UserCreate, UserResponse
@@ -102,9 +103,17 @@ class AuthService:
 
     async def me(self, user: User) -> MeResponse:
         employee_id = await self._employee_id_for(user)
+        has_completed_profile = False
+        if employee_id:
+            from sqlalchemy import select, func
+            stmt = select(func.count(Skill.id)).where(Skill.employee_id == employee_id)
+            count = (await self.db.execute(stmt)).scalar() or 0
+            has_completed_profile = count > 0
+
         return MeResponse(
             user=UserResponse.model_validate(user),
             employee_id=employee_id,
+            has_completed_profile=has_completed_profile,
         )
 
     # ── Internals ──────────────────────────────────────

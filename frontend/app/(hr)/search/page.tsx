@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Loader2, Search as SearchIcon, Users } from "lucide-react";
+import { FileText, Loader2, Search as SearchIcon, Sparkles, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -31,6 +31,9 @@ export default function SearchPage() {
           <TabsList>
             <TabsTrigger value="search" className="gap-2">
               <SearchIcon className="h-4 w-4" /> Search
+            </TabsTrigger>
+            <TabsTrigger value="jd" className="gap-2">
+              <FileText className="h-4 w-4" /> From JD
             </TabsTrigger>
             <TabsTrigger value="team" className="gap-2">
               <Users className="h-4 w-4" /> Build Team
@@ -118,6 +121,10 @@ export default function SearchPage() {
           </AnimatePresence>
         </TabsContent>
 
+        <TabsContent value="jd">
+          <JDSearchTab onOpen={setOpenId} totalProfiles={totalProfiles} />
+        </TabsContent>
+
         <TabsContent value="team">
           <TeamBuilderTab onOpen={setOpenId} />
         </TabsContent>
@@ -128,6 +135,136 @@ export default function SearchPage() {
         open={openId !== null}
         onOpenChange={(v) => !v && setOpenId(null)}
       />
+    </div>
+  );
+}
+
+function JDSearchTab({
+  onOpen,
+  totalProfiles,
+}: {
+  onOpen: (id: string) => void;
+  totalProfiles: number;
+}) {
+  const [jd, setJd] = useState("");
+  const jdSearch = useSearch();
+
+  function run() {
+    const text = jd.trim();
+    if (text.length < 30) {
+      toast.message("Paste at least a paragraph of the job description.");
+      return;
+    }
+    jdSearch.runFromJD(text, 5);
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardContent className="space-y-3 p-5">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium">Paste a job description</label>
+            <span className="text-xs text-muted-foreground">
+              {jd.length} chars
+            </span>
+          </div>
+          <Textarea
+            value={jd}
+            onChange={(e) => setJd(e.target.value)}
+            placeholder={`Paste the full JD here.\n\ne.g. "Senior Backend Engineer — Pune. 5+ years Java/Spring Boot, must have payment gateway integration (Razorpay/Stripe), PostgreSQL, Kafka. Fintech background a plus."`}
+            rows={8}
+            className="font-mono text-xs"
+          />
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted-foreground">
+              We&apos;ll distill it into a query and rank {totalProfiles} approved
+              profiles.
+            </span>
+            <Button
+              onClick={run}
+              disabled={
+                jdSearch.phase === "streaming" || jd.trim().length < 30
+              }
+              className="ml-auto"
+            >
+              {jdSearch.phase === "streaming" && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Find shortlist
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <AnimatePresence>
+        {jdSearch.generatedQuery && (
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="flex items-start gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3"
+          >
+            <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            <div className="min-w-0">
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-primary">
+                Distilled query
+              </div>
+              <p className="mt-0.5 break-words font-mono text-xs leading-relaxed">
+                {jdSearch.generatedQuery}
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="flex items-center gap-3">
+        {jdSearch.phase === "streaming" && (
+          <StreamingIndicator
+            message={
+              jdSearch.generatedQuery
+                ? "Ranking candidates…"
+                : "Reading the JD…"
+            }
+          />
+        )}
+        {jdSearch.phase === "done" && (
+          <span className="text-sm text-muted-foreground">
+            {jdSearch.results.length} ranked result
+            {jdSearch.results.length === 1 ? "" : "s"}.
+          </span>
+        )}
+        {jdSearch.phase === "error" && jdSearch.error && (
+          <span className="text-sm text-destructive">{jdSearch.error}</span>
+        )}
+        {(jdSearch.results.length > 0 ||
+          jdSearch.generatedQuery ||
+          jdSearch.phase === "error") && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="ml-auto"
+            onClick={jdSearch.reset}
+          >
+            Clear
+          </Button>
+        )}
+      </div>
+
+      <div className="space-y-4">
+        {jdSearch.results.map((r, i) => (
+          <ResultCard
+            key={r.employee_id + i}
+            result={r}
+            index={i}
+            onOpen={(id) => onOpen(id)}
+          />
+        ))}
+        {jdSearch.phase === "done" && jdSearch.results.length === 0 && (
+          <p className="rounded-md border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
+            No candidates matched. Try a JD with more concrete requirements.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

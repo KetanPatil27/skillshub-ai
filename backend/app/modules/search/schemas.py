@@ -8,9 +8,20 @@ class SearchRequest(BaseModel):
     limit: int = Field(default=5, ge=1, le=10)
 
 
+class JDSearchRequest(BaseModel):
+    job_description: str = Field(min_length=30, max_length=8000)
+    limit: int = Field(default=5, ge=1, le=10)
+
+
 class TeamBuildRequest(BaseModel):
     brief: str = Field(min_length=5, max_length=600)
     team_size: int = Field(default=4, ge=2, le=8)
 
 
-__all__ = ["SearchRequest", "TeamBuildRequest", "SearchResult", "TeamBuildResult"]
+__all__ = [
+    "SearchRequest",
+    "JDSearchRequest",
+    "TeamBuildRequest",
+    "SearchResult",
+    "TeamBuildResult",
+]

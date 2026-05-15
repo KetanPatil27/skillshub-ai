@@ -4,7 +4,12 @@ from fastapi.responses import StreamingResponse
 from app.common.decorators import require_admin
 from app.common.dependencies import CurrentUser, DbSession
 from app.modules.ai.schemas import TeamBuildResult
-from app.modules.search.schemas import SearchRequest, SearchResult, TeamBuildRequest
+from app.modules.search.schemas import (
+    JDSearchRequest,
+    SearchRequest,
+    SearchResult,
+    TeamBuildRequest,
+)
 from app.modules.search.service import SearchService
 
 router = APIRouter(prefix="/search", tags=["Search"])
@@ -28,6 +33,36 @@ async def search_stream(
     _admin=Depends(require_admin),
 ) -> StreamingResponse:
     generator = SearchService(db).stream(payload.query, payload.limit, user.id)
+    return StreamingResponse(
+        generator,
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive",
+        },
+    )
+
+
+@router.post(
+    "/jd",
+    summary="Paste a job description, get a ranked shortlist (HR only, SSE stream)",
+    description=(
+        "Two-stage SSE: first emits `event: query` with the distilled hiring "
+        "query the AI generated from the JD, then streams `event: result` "
+        "events per candidate using the same ranker as POST /search."
+    ),
+    response_class=StreamingResponse,
+)
+async def search_from_jd(
+    payload: JDSearchRequest,
+    user: CurrentUser,
+    db: DbSession,
+    _admin=Depends(require_admin),
+) -> StreamingResponse:
+    generator = SearchService(db).stream_from_jd(
+        payload.job_description, payload.limit, user.id
+    )
     return StreamingResponse(
         generator,
         media_type="text/event-stream",

@@ -16,7 +16,7 @@ from app.common.utils import safe_json_loads
 from app.core.config import settings
 from app.core.exceptions import UpstreamAIError
 from app.modules.ai.client import get_client, make_generation_config
-from app.modules.ai.prompts import extraction_v1, inference_v1, search_v1
+from app.modules.ai.prompts import extraction_v1, inference_v1, jd_distill_v1, search_v1
 from app.modules.ai.schemas import (
     ExtractedProfile,
     InferredSkill,
@@ -107,6 +107,41 @@ async def infer_related_skills(explicit_skills: list[dict]) -> list[InferredSkil
             continue
         out.append(skill)
     return out
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# 3a. JD DISTILLATION
+# ────────────────────────────────────────────────────────────────────────────
+
+async def distill_jd_to_query(jd_text: str) -> str:
+    """Compress a verbose job description into a single hiring query (<=200 chars).
+
+    Uses the light Gemini model with low temperature — this is a deterministic
+    rewriting task, not creative ranking. Plain text out, not JSON.
+    """
+    prompt = jd_distill_v1.build_prompt(jd_text)
+    client = get_client()
+    try:
+        response = await asyncio.to_thread(
+            client.models.generate_content,
+            model=settings.GEMINI_MODEL_LIGHT,
+            contents=prompt,
+            config=make_generation_config(
+                response_mime_type="text/plain",
+                temperature=0.1,
+            ),
+        )
+    except Exception as e:
+        logger.exception("distill_jd_to_query gemini call failed")
+        raise UpstreamAIError("JD distillation failed") from e
+
+    text = (response.text or "").strip().strip('"').strip("'").strip()
+    # Collapse any accidental multi-line output to a single line.
+    text = " ".join(text.split())
+    if not text:
+        raise UpstreamAIError("JD distillation produced an empty query")
+    # Hard cap defensively — search prompt expects <=500 chars.
+    return text[:300]
 
 
 # ────────────────────────────────────────────────────────────────────────────

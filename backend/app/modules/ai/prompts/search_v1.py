@@ -19,6 +19,15 @@ RANKING RULES:
    * "payment gateway" matches Razorpay, Stripe, PayU, Paytm, Square, Braintree.
    * "real-time" matches Socket.IO, WebSocket, WebRTC, server-sent events, Firebase RTDB.
    * "ML" matches PyTorch, TensorFlow, scikit-learn, Hugging Face, LangChain.
+- Interpret AVAILABILITY and TIME constraints using `allocation_status` and `last_project_end_date`:
+   * "available now", "free", "bench", "between projects" -> prefer allocation_status == UNALLOCATED.
+   * "recently shipped", "just finished", "in the last quarter" ->
+     last_project_end_date within the past 90 days.
+   * "haven't been on a new project recently", "stale", "needs a new challenge" ->
+     last_project_end_date older than 90 days OR allocation_status == UNALLOCATED.
+   * Today's date is implicit; compare last_project_end_date against it. A null
+     last_project_end_date means "currently on a project" — treat as recent.
+   * Availability is a HARD requirement when the query explicitly asks for it.
 - match_score in [0, 100]:
    * 90-100: hits every hard requirement with strong evidence and clear seniority fit.
    * 75-89:  hits every hard requirement, weaker on one nice-to-have.

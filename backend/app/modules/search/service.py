@@ -59,6 +59,27 @@ class SearchService:
 
         yield f'event: done\ndata: {{"done": true, "count": {count}}}\n\n'
 
+    async def stream_from_jd(
+        self, job_description: str, limit: int, user_id: UUID | None
+    ) -> AsyncIterator[str]:
+        """Two-stage SSE:
+        1. Distill the JD into a hiring query (1 fast Gemini call).
+           Emit `event: query` carrying {"generated_query": "..."}.
+        2. Forward into the existing ranker and stream `event: result` per candidate.
+        """
+        try:
+            generated_query = await ai_service.distill_jd_to_query(job_description)
+        except Exception:
+            logger.exception("JD distillation failed")
+            yield 'event: error\ndata: {"message":"Could not summarise the job description."}\n\n'
+            yield 'event: done\ndata: {"done": true, "count": 0}\n\n'
+            return
+
+        yield f"event: query\ndata: {json.dumps({'generated_query': generated_query})}\n\n"
+
+        async for line in self.stream(generated_query, limit, user_id):
+            yield line
+
     async def rank_non_streaming(self, query: str, limit: int) -> list[SearchResult]:
         candidates = await self._candidates()
         return await ai_service.rank_candidates_non_streaming(query, candidates, limit)

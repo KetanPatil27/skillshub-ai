@@ -66,3 +66,4 @@ class RegisterResponse(BaseModel):
 class MeResponse(BaseModel):
     user: UserResponse
     employee_id: UUID | None = None
+    has_completed_profile: bool = False
