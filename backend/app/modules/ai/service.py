@@ -120,7 +120,7 @@ async def extract_resume(resume_text: str, allow_fallback: bool = True) -> Extra
     """Extract structured profile from resume text.
 
     Pipeline:
-    1. HF with mistralai/Mistral-7B-Instruct-v0.3 (strict JSON, retry on parse failure)
+    1. HF with Llama-3.1-8B-Instruct (strict JSON, retry on parse failure)
     2. Gemini (final fallback if HF fails)
     """
     prompt = extraction_v1.build_prompt(resume_text)

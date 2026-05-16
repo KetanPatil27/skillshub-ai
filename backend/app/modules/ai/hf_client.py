@@ -1,8 +1,8 @@
 """Hugging Face Inference API client.
 
-Primary AI provider for SkillsHub. Uses model-specific routing:
-- Resume extraction: Qwen2.5-72B-Instruct (primary) → Mistral-Large (fallback)
-- Search / inference / other: Llama-3.1-8B-Instruct (default)
+Primary AI provider for SkillsHub.  All operations (resume extraction,
+search, inference, team-building) use **meta-llama/Llama-3.1-8B-Instruct**
+as the primary model. Gemini is used as a fallback when HF fails.
 
 Includes robust JSON extraction, retry logic, and prompt truncation.
 """
@@ -21,7 +21,7 @@ from app.core.config import settings
 
 logger = logging.getLogger("skillshub.ai.hf")
 
-# Llama-3.1-8B has ~8k context; Qwen2.5-72B and Mistral-Large have ~128k.
+# Llama-3.1-8B has ~8k context; larger models (70B+) have ~128k.
 # We use a conservative default and a larger limit for big models.
 _MAX_PROMPT_CHARS_DEFAULT = 22_000
 _MAX_PROMPT_CHARS_LARGE = 100_000
@@ -266,9 +266,8 @@ def hf_generate(
 def hf_generate_resume(prompt: str, *, temperature: float = 0.1) -> str:
     """Dedicated resume extraction call with strict JSON enforcement.
 
-    Model priority:
-    1. Qwen/Qwen2.5-72B-Instruct  (strong JSON adherence, large context)
-    2. mistralai/Mistral-Large-Instruct  (fallback if Qwen fails)
+    Uses the models configured in HF_RESUME_MODEL / HF_RESUME_FALLBACK_MODEL
+    (default: meta-llama/Llama-3.1-8B-Instruct for both).
 
     Includes retry-on-parse-failure logic.
     """
