@@ -27,6 +27,14 @@ SkillsHub is a full-stack AI app that solves two real HR problems for a 200-pers
 
 ---
 
+## 📚 Docs & Project Materials
+
+All project documents, guides, screenshots, demo videos, and reference material are mirrored in a shared Google Drive folder:
+
+🔗 **[📂 Open the SkillsHub Drive folder](https://drive.google.com/drive/folders/1T_fyEQC8E9uAY85FYae75Em8T1vTxu4B?usp=sharing)**
+
+---
+
 ## 🛠️ Tech Stack
 
 | Layer        | Choice                                                                 |
