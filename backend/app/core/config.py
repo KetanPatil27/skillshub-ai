@@ -34,6 +34,14 @@ class Settings(BaseSettings):
     GEMINI_MODEL_SHOWCASE: str = "gemini-2.5-pro"
     GEMINI_MODEL_LIGHT: str = "gemini-2.5-flash"
 
+    # Hugging Face — primary AI provider
+    HUGGINGFACEHUB_API_TOKEN: str | None = None
+    HF_MODEL_ID: str = "meta-llama/Llama-3.1-8B-Instruct"  # default chat/search
+
+    # Dedicated models for structured JSON resume extraction (higher quality)
+    HF_RESUME_MODEL: str = "meta-llama/Llama-3.1-8B-Instruct"
+    HF_RESUME_FALLBACK_MODEL: str = "meta-llama/Llama-3.1-8B-Instruct"
+
     CORS_ORIGINS: str = "http://localhost:3000"
 
     SEED_HR_EMAIL: str = "hr@skillshub.demo"

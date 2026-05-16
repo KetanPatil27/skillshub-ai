@@ -45,12 +45,17 @@ RULES = """EXTRACTION RULES (follow strictly):
    that skill appears. If dates are missing, estimate conservatively (round DOWN).
 3. Every skill MUST include a short `evidence` quote (<=180 chars) taken from the
    resume — the exact phrase that justified picking it.
-4. Categorise skills:
-   - LANGUAGE: Java, Python, TypeScript, Go, etc.
-   - FRAMEWORK: React, Spring Boot, FastAPI, Next.js, etc.
-   - PLATFORM: AWS, GCP, Kubernetes, Docker, Vercel, Supabase, etc.
-   - TOOL: Git, Postman, Jira, Figma, etc.
-   - DOMAIN: Fintech, Healthcare, E-commerce, Logistics, etc.
+4. Categorise skills (use these examples — do NOT invent new categories):
+   - LANGUAGE: Java, Python, TypeScript, JavaScript, Go, C#, SQL, HTML, CSS, etc.
+   - FRAMEWORK: React, Next.js, Spring Boot, FastAPI, Angular, Vue, Express,
+     Django, Flask, Tailwind CSS, Bootstrap, Material UI, etc.
+   - PLATFORM: AWS, GCP, Azure, Kubernetes, Docker, Vercel, Supabase, Firebase,
+     Razorpay, Stripe, PostgreSQL, MongoDB, Redis, Kafka, etc.
+   - TOOL: Git, Postman, Jira, Figma, Webpack, Vite, ESLint, Jest, JUnit, etc.
+   - DOMAIN: Fintech, Healthcare, E-commerce, Logistics, EdTech, etc.
+   IMPORTANT: HTML and CSS are LANGUAGE, never TOOL. Tailwind CSS is FRAMEWORK,
+   never TOOL. Payment gateways (Razorpay, Stripe, PayU, Paytm) are PLATFORM,
+   never DOMAIN.
 5. Project tech_stack must use the SAME normalised skill names you used in `skills`.
 6. Location should be a single city name where possible ("Pune", "Bangalore", "Remote").
 7. years_experience at profile level = the overall career span, not the sum of skills.
@@ -125,4 +130,10 @@ def build_prompt(resume_text: str) -> str:
 NOW PARSE THIS RESUME — output JSON ONLY:
 \"\"\"
 {resume_text}
-\"\"\""""
+\"\"\"
+
+IMPORTANT REMINDERS:
+- Return ONLY valid JSON. No markdown. No explanations. No code fences.
+- Start your response with {{ and end with }}.
+- Every string must be properly quoted and escaped.
+- Do NOT truncate the output — include ALL skills and projects found."""

@@ -357,14 +357,30 @@ function TeamBuilderTab({ onOpen }: { onOpen: (id: string) => void }) {
             <Card>
               <CardContent className="p-5">
                 <h3 className="mb-2 text-sm font-semibold">Alternates</h3>
-                <ul className="space-y-1 text-sm text-muted-foreground">
-                  {team.data.alternates.map((a) => (
-                    <li key={a.employee_id}>
-                      <span className="font-medium text-foreground">{a.name}</span> — would
-                      replace {a.would_replace}
-                    </li>
-                  ))}
-                </ul>
+                <div className="space-y-2">
+                  {team.data.alternates.map((a) => {
+                    const replacedMember = team.data!.team.find(
+                      (m) => m.employee_id === a.would_replace
+                    );
+                    const replaceName = replacedMember?.name ?? a.would_replace;
+                    return (
+                      <div
+                        key={a.employee_id}
+                        className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition-colors hover:bg-muted/50"
+                        onClick={() => onOpen(a.employee_id)}
+                      >
+                        <Avatar name={a.name} size={32} />
+                        <div className="flex-1 min-w-0">
+                          <span className="font-medium text-foreground">{a.name}</span>
+                          <p className="text-xs text-muted-foreground">
+                            Could replace{" "}
+                            <span className="font-medium text-foreground">{replaceName}</span>
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </CardContent>
             </Card>
           )}

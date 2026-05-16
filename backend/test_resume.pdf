@@ -1,0 +1,61 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792]
+   /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+
+4 0 obj
+<< /Length 6 0 R >>
+stream
+BT
+/F1 16 Tf 72 720 Td (Sneha Reddy) Tj
+/F1 12 Tf 0 -20 Td (Senior Frontend Engineer - Bengaluru) Tj
+0 -15 Td (6 years of experience building high-traffic e-commerce storefronts on Next.js) Tj
+0 -20 Td (Skills: TypeScript, JavaScript, React, Next.js, CSS, Tailwind CSS, HTML, Figma) Tj
+0 -25 Td (Experience:) Tj
+0 -15 Td (Senior Frontend Engineer at ShopEasy Jan 2022 to Present) Tj
+0 -12 Td (Architected the component library used by 15 teams. Built high-traffic) Tj
+0 -12 Td (e-commerce storefronts on Next.js serving 500K daily users.) Tj
+0 -12 Td (Led migration from JavaScript to TypeScript across 40 repositories.) Tj
+0 -18 Td (Frontend Developer at WebCraft Jun 2019 to Dec 2021) Tj
+0 -12 Td (Developed responsive dashboards with React and TypeScript.) Tj
+0 -12 Td (Implemented Razorpay checkout integration handling 50K transactions monthly.) Tj
+0 -12 Td (Built reusable UI components with Tailwind CSS.) Tj
+0 -18 Td (Junior Developer at TechStart Jul 2018 to May 2019) Tj
+0 -12 Td (Used JavaScript HTML and CSS for web development.) Tj
+0 -12 Td (Learned React and built internal tools. Used Figma for design collaboration.) Tj
+ET
+endstream
+endobj
+
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+
+6 0 obj
+743
+endobj
+
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000266 00000 n 
+0000001072 00000 n 
+0000001149 00000 n 
+
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+1168
+%%EOF

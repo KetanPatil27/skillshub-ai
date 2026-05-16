@@ -1,0 +1,139 @@
+================================================================================
+  SkillsHub AI — Example Prompts
+  Use these to demo Search, JD Distillation, and Team Builder features.
+================================================================================
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🔍 SEARCH PROMPTS
+  Paste these into the AI Search bar on the HR dashboard.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1.  Find me a React developer with at least 3 years of experience who knows
+    TypeScript and has worked on payment gateway integrations.
+
+2.  Show me backend engineers skilled in Python and FastAPI who are currently
+    available (unallocated) and have experience with PostgreSQL.
+
+3.  I need a full-stack developer who has worked with Next.js and Node.js,
+    preferably someone based in Pune or Mumbai.
+
+4.  Find candidates with machine learning experience — PyTorch or TensorFlow —
+    who have shipped a project in the last quarter.
+
+5.  Who are the top Java developers with Spring Boot and microservices
+    experience? Prioritize people with 5+ years.
+
+6.  Search for DevOps engineers familiar with Docker, Kubernetes, and CI/CD
+    pipelines who are on the bench right now.
+
+7.  I'm looking for a mobile developer — React Native or Flutter — who has
+    published apps on the Play Store or App Store.
+
+8.  Find someone with strong SQL skills and data analytics experience,
+    ideally with Power BI or Tableau knowledge.
+
+9.  Show me frontend engineers who know Angular and have e-commerce project
+    experience, available within the next month.
+
+10. Any cloud architects with AWS or Azure certifications who have
+    designed scalable systems handling 10k+ concurrent users?
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📄 JOB DESCRIPTION (JD) PROMPTS
+  Paste these into the "Paste JD" textarea. The system will distill them
+  into a short search query automatically.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1.  We are hiring a Senior Full-Stack Developer to join our fintech team.
+    The ideal candidate has 4+ years of experience building web applications
+    using React.js, Node.js, and MongoDB. Experience with payment processing
+    (Stripe, Razorpay) is a strong plus. Must be comfortable with agile
+    workflows and CI/CD. Location: Bangalore. Remote-friendly.
+
+2.  Looking for a Machine Learning Engineer to build and deploy NLP pipelines.
+    Requirements: Python, PyTorch or TensorFlow, experience with transformer
+    models (BERT, GPT), MLOps tools like MLflow or Kubeflow. 3+ years in a
+    production ML role. Healthcare or pharma domain experience preferred.
+
+3.  Junior Frontend Developer needed for our e-commerce platform team.
+    Must know HTML, CSS, JavaScript, and React. Familiarity with Tailwind CSS,
+    REST APIs, and Git is expected. Fresh graduates with strong portfolio
+    projects are welcome. Office based in Hyderabad.
+
+4.  DevOps / SRE Engineer — We need someone to manage our cloud infrastructure
+    on AWS (ECS, Lambda, RDS, S3). Must have hands-on experience with Terraform,
+    Docker, and GitHub Actions. On-call rotation required. 2-5 years experience.
+
+5.  Data Analyst with strong SQL skills and experience in business intelligence
+    tools (Power BI, Looker, or Tableau). Should be able to build dashboards,
+    write complex queries, and present insights to stakeholders. Experience
+    in retail or supply chain analytics is a bonus. 1-3 years.
+
+6.  We're looking for a Backend Developer proficient in Java and Spring Boot
+    to work on our enterprise resource planning platform. The role involves
+    designing RESTful APIs, database optimization (PostgreSQL), and integrating
+    third-party services. Microservices architecture experience is a must.
+    5+ years required. Pune office.
+
+7.  Mobile App Developer — Build and maintain cross-platform mobile apps using
+    Flutter or React Native. Must have published at least one app on
+    Google Play or Apple App Store. Experience with Firebase, push notifications,
+    and offline-first architecture. 2-4 years of experience.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🏗️ TEAM BUILDER PROMPTS
+  Paste these into the "Project Brief" field of the Team Builder feature.
+  Set team size to the suggested number or leave at default (4).
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1.  Build an internal employee portal with role-based access, leave management,
+    and a real-time notification system. Tech stack: React, Node.js, PostgreSQL,
+    Socket.IO. Timeline: 3 months.
+    → Suggested team size: 4
+
+2.  We need a team to build a customer-facing e-commerce mobile app with
+    product catalog, cart, payment integration (Razorpay), and order tracking.
+    Must support Android and iOS. Tech: Flutter, Firebase, Node.js backend.
+    → Suggested team size: 4
+
+3.  Create an AI-powered resume screening tool that parses PDF resumes,
+    extracts skills using NLP, and ranks candidates against job descriptions.
+    Tech: Python, FastAPI, Hugging Face transformers, React dashboard.
+    → Suggested team size: 3
+
+4.  Migrate our monolithic Java application to a microservices architecture
+    on AWS. Need expertise in Spring Boot, Docker, Kubernetes, Terraform,
+    and CI/CD pipelines. Includes setting up monitoring with Prometheus
+    and Grafana.
+    → Suggested team size: 5
+
+5.  Design and build a real-time analytics dashboard for our logistics
+    operations. Features: live shipment tracking on maps, KPI widgets,
+    alert rules, and PDF report export. Tech: React, D3.js, Python,
+    PostgreSQL, Redis for caching.
+    → Suggested team size: 4
+
+6.  Build a secure healthcare patient management system with appointment
+    scheduling, electronic health records, and video consultation.
+    Must be HIPAA-aware. Tech: Next.js, Node.js, PostgreSQL, WebRTC.
+    → Suggested team size: 5
+
+7.  Develop a SaaS billing platform with subscription management,
+    usage-based metering, invoice generation, and Stripe integration.
+    Needs a clean admin dashboard and tenant isolation.
+    Tech: React, Python/FastAPI, PostgreSQL.
+    → Suggested team size: 4
+
+
+================================================================================
+  💡 TIPS FOR JUDGES
+  - Try search prompts 1, 2, and 6 first — they test skill matching +
+    availability filtering.
+  - Paste JD prompt 1 or 4 to see how the system auto-distills long job
+    descriptions into concise search queries.
+  - Use team builder prompt 1 or 3 with team_size=4 to see the AI assemble
+    a balanced team with rationale.
+================================================================================

@@ -59,12 +59,23 @@ def build_prompt(explicit_skills: list[dict]) -> str:
         }
         for s in explicit_skills
     ]
+    forbidden = [s["name"] for s in compact]
     return f"""{SYSTEM_PROMPT}
 
 {SCHEMA_HINT}
 
 {FEW_SHOT}
 
-NOW INFER FROM THIS SKILL LIST — output JSON array ONLY:
+NOW INFER FROM THIS SKILL LIST:
 {json.dumps(compact, indent=2)}
-"""
+
+HARD CONSTRAINT — your output MUST NOT contain any of these names
+(case-insensitive match — they are already on the resume, repeating them
+is forbidden):
+{json.dumps(forbidden)}
+
+If you cannot think of a high-confidence inference whose `name` is NOT in
+the forbidden list above, return an empty array []. Returning a name from
+the forbidden list invalidates the entire response.
+
+Output JSON array ONLY:"""

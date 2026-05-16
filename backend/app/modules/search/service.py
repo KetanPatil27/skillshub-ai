@@ -71,9 +71,10 @@ class SearchService:
                     top_score = result.match_score
                 payload = result.model_dump()
                 yield f"event: result\ndata: {json.dumps(payload)}\n\n"
-        except Exception:
+        except Exception as exc:
             logger.exception("search stream failed mid-flight")
-            yield 'event: error\ndata: {"message":"Search failed mid-stream"}\n\n'
+            msg = str(exc) or "Search failed mid-stream"
+            yield f"event: error\ndata: {json.dumps({'message': msg})}\n\n"
 
         self.db.add(
             SearchQueryLog(
@@ -97,9 +98,10 @@ class SearchService:
         """
         try:
             generated_query = await ai_service.distill_jd_to_query(job_description)
-        except Exception:
+        except Exception as exc:
             logger.exception("JD distillation failed")
-            yield 'event: error\ndata: {"message":"Could not summarise the job description."}\n\n'
+            msg = str(exc) or "Could not summarise the job description."
+            yield f"event: error\ndata: {json.dumps({'message': msg})}\n\n"
             yield 'event: done\ndata: {"done": true, "count": 0}\n\n'
             return
 

@@ -2,6 +2,9 @@
 
 Pure async functions over plain dicts/strings. The HTTP layer adapts these into
 DB rows and SSE streams. Keeping this layer pure makes the CLI scripts trivial.
+
+Includes automatic fallback to Hugging Face Inference API when the Gemini
+free-tier quota is exhausted (RESOURCE_EXHAUSTED / 429).
 """
 
 from __future__ import annotations
@@ -16,6 +19,7 @@ from app.common.utils import safe_json_loads
 from app.core.config import settings
 from app.core.exceptions import UpstreamAIError
 from app.modules.ai.client import get_client, make_generation_config
+from app.modules.ai.hf_client import hf_available, hf_generate, hf_generate_resume, is_quota_error, safe_parse_json
 from app.modules.ai.prompts import extraction_v1, inference_v1, jd_distill_v1, search_v1
 from app.modules.ai.schemas import (
     ExtractedProfile,
@@ -27,38 +31,123 @@ from app.modules.ai.schemas import (
 logger = logging.getLogger("skillshub.ai")
 
 
+def _humanize_gemini_error(exc: BaseException) -> str:
+    """Map raw Gemini SDK errors to a message the UI can show to a user.
+
+    The SDK raises `google.genai.errors.ClientError` (HTTP 4xx) and
+    `ServerError` (5xx); we check status code via attribute lookups so this
+    file doesn't have to import the SDK error types.
+    """
+    code = getattr(exc, "code", None) or getattr(exc, "status_code", None)
+    text = str(exc)
+    if code == 429 or "RESOURCE_EXHAUSTED" in text:
+        return (
+            "Daily AI quota reached for the configured Gemini model. "
+            "Try again after the quota resets, or switch GEMINI_MODEL_SHOWCASE "
+            "in your .env to a different model."
+        )
+    if code == 503 or "UNAVAILABLE" in text:
+        return "The AI service is temporarily overloaded. Please retry in a few seconds."
+    if code in (401, 403):
+        return "AI service rejected the request — check that GOOGLE_API_KEY is valid."
+    return "The AI service failed to respond. Please retry."
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# HELPER: HF-first call with automatic Gemini fallback
+# ────────────────────────────────────────────────────────────────────────────
+
+async def _call_ai(
+    *,
+    prompt: str,
+    model: str,
+    temperature: float = 0.2,
+    response_mime_type: str = "application/json",
+    label: str = "ai_call",
+) -> str:
+    """Try Hugging Face first.  If HF fails (OOM, rate-limit, any error),
+    fall back to Gemini.
+
+    Returns the raw response text.
+    """
+    # ── 1. Try HF first ──
+    if hf_available():
+        try:
+            text = await asyncio.to_thread(
+                hf_generate,
+                prompt,
+                temperature=temperature,
+            )
+            return text
+        except Exception as hf_exc:
+            logger.warning(
+                "%s: HF failed (%s) — falling back to Gemini",
+                label,
+                hf_exc,
+            )
+
+    # ── 2. Gemini fallback ──
+    client = get_client()
+    try:
+        logger.info("%s: using Gemini (%s)", label, model)
+        response = await asyncio.to_thread(
+            client.models.generate_content,
+            model=model,
+            contents=prompt,
+            config=make_generation_config(
+                temperature=temperature,
+                response_mime_type=response_mime_type,
+            ),
+        )
+        return (response.text or "").strip()
+    except Exception as gemini_exc:
+        logger.exception("%s: Gemini also failed", label)
+        raise UpstreamAIError(_humanize_gemini_error(gemini_exc)) from gemini_exc
+
+
 # ────────────────────────────────────────────────────────────────────────────
 # 1. RESUME EXTRACTION
 # ────────────────────────────────────────────────────────────────────────────
 
 async def extract_resume(resume_text: str) -> ExtractedProfile:
-    """Single Gemini call returning the structured profile JSON."""
+    """Extract structured profile from resume text.
+
+    Pipeline:
+    1. HF with mistralai/Mistral-7B-Instruct-v0.3 (strict JSON, retry on parse failure)
+    2. Gemini (final fallback if HF fails)
+    """
     prompt = extraction_v1.build_prompt(resume_text)
+
+    # ── 1. Try HF dedicated resume model (Mistral) ──
+    if hf_available():
+        try:
+            logger.info("extract_resume: using HF (%s)", settings.HF_RESUME_MODEL)
+            text = await asyncio.to_thread(hf_generate_resume, prompt, temperature=0.1)
+            data = safe_parse_json(text)
+            logger.info("extract_resume: HF resume model succeeded")
+            return ExtractedProfile.model_validate(data)
+        except Exception as hf_exc:
+            logger.warning(
+                "extract_resume: HF resume pipeline failed (%s) — trying Gemini",
+                hf_exc,
+            )
+
+    # ── 2. Gemini fallback ──
     client = get_client()
     try:
-        # google-genai is sync; run in a thread to avoid blocking the event loop.
+        logger.info("extract_resume: using Gemini (%s) as fallback", settings.GEMINI_MODEL_SHOWCASE)
         response = await asyncio.to_thread(
             client.models.generate_content,
             model=settings.GEMINI_MODEL_SHOWCASE,
             contents=prompt,
             config=make_generation_config(temperature=0.1),
         )
-    except Exception as e:
-        logger.exception("extract_resume gemini call failed")
-        raise UpstreamAIError("Resume extraction failed") from e
-
-    text = (response.text or "").strip()
-    try:
+        text = (response.text or "").strip()
         data = safe_json_loads(text)
-    except json.JSONDecodeError as e:
-        logger.error("extract_resume invalid JSON: %s", text[:500])
-        raise UpstreamAIError("AI returned invalid JSON for extraction") from e
-
-    try:
         return ExtractedProfile.model_validate(data)
     except Exception as e:
-        logger.error("extract_resume schema validation failed: %s", e)
-        raise UpstreamAIError("AI returned a profile that didn't match the schema") from e
+        logger.exception("extract_resume: Gemini call failed")
+        raise UpstreamAIError("Resume extraction failed on both HF and Gemini") from e
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -70,20 +159,18 @@ async def infer_related_skills(explicit_skills: list[dict]) -> list[InferredSkil
     if not explicit_skills:
         return []
     prompt = inference_v1.build_prompt(explicit_skills)
-    client = get_client()
     try:
-        response = await asyncio.to_thread(
-            client.models.generate_content,
+        text = await _call_ai(
+            prompt=prompt,
             model=settings.GEMINI_MODEL_LIGHT,
-            contents=prompt,
-            config=make_generation_config(temperature=0.3),
+            temperature=0.3,
+            label="infer_related_skills",
         )
-    except Exception as e:
-        logger.exception("infer_related_skills gemini call failed")
+    except Exception:
+        logger.exception("infer_related_skills ai call failed")
         # Inference is non-critical — degrade gracefully.
         return []
 
-    text = (response.text or "").strip()
     try:
         data = safe_json_loads(text)
     except json.JSONDecodeError:
@@ -116,26 +203,23 @@ async def infer_related_skills(explicit_skills: list[dict]) -> list[InferredSkil
 async def distill_jd_to_query(jd_text: str) -> str:
     """Compress a verbose job description into a single hiring query (<=200 chars).
 
-    Uses the light Gemini model with low temperature — this is a deterministic
+    Uses the light model with low temperature — this is a deterministic
     rewriting task, not creative ranking. Plain text out, not JSON.
     """
     prompt = jd_distill_v1.build_prompt(jd_text)
-    client = get_client()
     try:
-        response = await asyncio.to_thread(
-            client.models.generate_content,
+        text = await _call_ai(
+            prompt=prompt,
             model=settings.GEMINI_MODEL_LIGHT,
-            contents=prompt,
-            config=make_generation_config(
-                response_mime_type="text/plain",
-                temperature=0.1,
-            ),
+            temperature=0.1,
+            response_mime_type="text/plain",
+            label="distill_jd_to_query",
         )
     except Exception as e:
-        logger.exception("distill_jd_to_query gemini call failed")
-        raise UpstreamAIError("JD distillation failed") from e
+        logger.exception("distill_jd_to_query ai call failed")
+        raise UpstreamAIError(_humanize_gemini_error(e)) from e
 
-    text = (response.text or "").strip().strip('"').strip("'").strip()
+    text = text.strip().strip('"').strip("'").strip()
     # Collapse any accidental multi-line output to a single line.
     text = " ".join(text.split())
     if not text:
@@ -202,50 +286,78 @@ async def stream_search_results(
     limit: int,
     temporal_context: dict[str, str],
 ) -> AsyncIterator[SearchResult]:
-    """Yields SearchResult objects one at a time as Gemini streams its JSON array.
+    """Yields SearchResult objects one at a time as the AI returns its JSON array.
 
-    The Gemini Python SDK is synchronous; we iterate the chunks in a worker thread and
-    forward parsed objects via an asyncio.Queue.
+    Tries HF first (non-streaming). If HF fails, falls back to Gemini streaming.
     """
     prompt = search_v1.build_prompt(query, candidates, limit, temporal_context)
-    client = get_client()
 
     queue: asyncio.Queue[SearchResult | None | Exception] = asyncio.Queue()
     loop = asyncio.get_running_loop()
 
     def _producer() -> None:
-        try:
-            stream = client.models.generate_content_stream(
-                model=settings.GEMINI_MODEL_SHOWCASE,
-                contents=prompt,
-                config=make_generation_config(temperature=0.2),
-            )
-            buffer = ""
-            seen = 0
-            for chunk in stream:
-                piece = getattr(chunk, "text", None) or ""
-                if not piece:
-                    continue
-                buffer += piece
-                objs, buffer = _iter_complete_objects(buffer)
-                for obj in objs:
+        hf_succeeded = False
+
+        # ── 1. Try HF first (non-streaming) ──
+        if hf_available():
+            try:
+                text = hf_generate(prompt, temperature=0.2)
+                data = safe_json_loads(text)
+                if isinstance(data, list):
+                    for item in data[:limit]:
+                        try:
+                            result = SearchResult.model_validate(item)
+                            asyncio.run_coroutine_threadsafe(
+                                queue.put(result), loop
+                            ).result()
+                        except Exception:
+                            continue
+                    hf_succeeded = True
+            except Exception as hf_exc:
+                logger.warning(
+                    "stream_search_results: HF failed (%s) — falling back to Gemini",
+                    hf_exc,
+                )
+
+        # ── 2. Gemini fallback (streaming) ──
+        if not hf_succeeded:
+            try:
+                client = get_client()
+                stream = client.models.generate_content_stream(
+                    model=settings.GEMINI_MODEL_SHOWCASE,
+                    contents=prompt,
+                    config=make_generation_config(temperature=0.2),
+                )
+                buffer = ""
+                seen = 0
+                for chunk in stream:
+                    piece = getattr(chunk, "text", None) or ""
+                    if not piece:
+                        continue
+                    buffer += piece
+                    objs, buffer = _iter_complete_objects(buffer)
+                    for obj in objs:
+                        if seen >= limit:
+                            break
+                        try:
+                            result = SearchResult.model_validate(obj)
+                        except Exception:
+                            continue
+                        seen += 1
+                        asyncio.run_coroutine_threadsafe(queue.put(result), loop).result()
                     if seen >= limit:
                         break
-                    try:
-                        result = SearchResult.model_validate(obj)
-                    except Exception:
-                        continue
-                    seen += 1
-                    asyncio.run_coroutine_threadsafe(queue.put(result), loop).result()
-                if seen >= limit:
-                    break
-        except Exception as exc:  # noqa: BLE001
-            logger.exception("stream_search_results producer failed")
-            asyncio.run_coroutine_threadsafe(queue.put(exc), loop).result()
+            except Exception as exc:  # noqa: BLE001
+                logger.exception("stream_search_results: Gemini also failed")
+                asyncio.run_coroutine_threadsafe(queue.put(exc), loop).result()
+
+    def _producer_wrapper() -> None:
+        try:
+            _producer()
         finally:
             asyncio.run_coroutine_threadsafe(queue.put(None), loop).result()
 
-    task = asyncio.create_task(asyncio.to_thread(_producer))
+    task = asyncio.create_task(asyncio.to_thread(_producer_wrapper))
 
     try:
         while True:
@@ -253,7 +365,7 @@ async def stream_search_results(
             if item is None:
                 break
             if isinstance(item, Exception):
-                raise UpstreamAIError("Search streaming failed") from item
+                raise UpstreamAIError(_humanize_gemini_error(item)) from item
             yield item
     finally:
         await task
@@ -269,18 +381,16 @@ async def rank_candidates_non_streaming(
     and parses the full JSON array in one shot.
     """
     prompt = search_v1.build_prompt(query, candidates, limit, temporal_context)
-    client = get_client()
     try:
-        response = await asyncio.to_thread(
-            client.models.generate_content,
+        text = await _call_ai(
+            prompt=prompt,
             model=settings.GEMINI_MODEL_SHOWCASE,
-            contents=prompt,
-            config=make_generation_config(temperature=0.2),
+            temperature=0.2,
+            label="rank_candidates",
         )
     except Exception as e:
-        raise UpstreamAIError("Search failed") from e
+        raise UpstreamAIError(_humanize_gemini_error(e)) from e
 
-    text = (response.text or "").strip()
     try:
         data = safe_json_loads(text)
     except json.JSONDecodeError as e:
@@ -303,18 +413,16 @@ async def rank_candidates_non_streaming(
 
 async def build_team(brief: str, candidates: list[dict], team_size: int) -> TeamBuildResult:
     prompt = search_v1.build_team_prompt(brief, candidates, team_size)
-    client = get_client()
     try:
-        response = await asyncio.to_thread(
-            client.models.generate_content,
+        text = await _call_ai(
+            prompt=prompt,
             model=settings.GEMINI_MODEL_SHOWCASE,
-            contents=prompt,
-            config=make_generation_config(temperature=0.3),
+            temperature=0.3,
+            label="build_team",
         )
     except Exception as e:
         raise UpstreamAIError("Team builder failed") from e
 
-    text = (response.text or "").strip()
     try:
         data = safe_json_loads(text)
     except json.JSONDecodeError as e:
