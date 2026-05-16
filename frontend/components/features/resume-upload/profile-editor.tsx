@@ -5,6 +5,7 @@ import { Briefcase, Check, MapPin, Sparkles, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Avatar } from "@/components/shared/avatar";
+import { ProfileCompletenessMeter } from "@/components/shared/profile-completeness-meter";
 import { SkillPill } from "@/components/shared/skill-pill";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { computeProfileCompleteness } from "@/lib/profile-completeness";
 import { cn } from "@/lib/utils";
 import type { Employee, Project, Skill } from "@/types";
 
@@ -101,6 +103,19 @@ export function ProfileEditor({
     return map;
   }, [explicit]);
 
+  const completeness = useMemo(
+    () =>
+      computeProfileCompleteness({
+        headline: state.headline,
+        location: state.location,
+        years_experience: state.years_experience,
+        bio: state.bio,
+        skills: state.skills,
+        projects: state.projects,
+      }),
+    [state.headline, state.location, state.years_experience, state.bio, state.skills, state.projects],
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -108,6 +123,15 @@ export function ProfileEditor({
       transition={{ duration: 0.35 }}
       className="space-y-6"
     >
+      <Card>
+        <CardContent className="p-4">
+          <ProfileCompletenessMeter
+            score={completeness.score}
+            missing={completeness.missing}
+          />
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader className="flex flex-row items-center gap-4 space-y-0">
           <Avatar name={state.full_name || "?"} size={56} />

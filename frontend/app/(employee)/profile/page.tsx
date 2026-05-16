@@ -10,6 +10,7 @@ import {
   type ProfileEditorState,
 } from "@/components/features/resume-upload/profile-editor";
 import { Avatar } from "@/components/shared/avatar";
+import { ProfileCompletenessMeter } from "@/components/shared/profile-completeness-meter";
 import { SkillPill } from "@/components/shared/skill-pill";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ import {
   useUpdateEmployee,
 } from "@/hooks/use-employees";
 import { errorMessage } from "@/lib/api";
+import { computeProfileCompleteness } from "@/lib/profile-completeness";
 import { allocationTone, cn } from "@/lib/utils";
 
 export default function ProfilePage() {
@@ -35,6 +37,7 @@ export default function ProfilePage() {
   async function save(state: ProfileEditorState) {
     if (!emp) return;
     try {
+      const wasApproved = emp.status === "APPROVED";
       await update.mutateAsync({
         full_name: state.full_name,
         headline: state.headline,
@@ -45,8 +48,12 @@ export default function ProfilePage() {
         allocation_status: state.allocation_status,
       } as any);
       await skills.mutateAsync(state.skills);
-      await projects.mutateAsync(state.projects);
-      toast.success("Profile updated.");
+      const final = await projects.mutateAsync(state.projects);
+      if (wasApproved && final.status === "PENDING_REVIEW") {
+        toast.success("Profile updated. Sent to HR for re-review.");
+      } else {
+        toast.success("Profile updated.");
+      }
       setEditing(false);
     } catch (e) {
       toast.error(errorMessage(e));
@@ -96,6 +103,14 @@ export default function ProfilePage() {
   }
 
   const tone = allocationTone(emp.allocation_status);
+  const completeness = computeProfileCompleteness({
+    headline: emp.headline,
+    location: emp.location,
+    years_experience: emp.years_experience,
+    bio: emp.bio,
+    skills: emp.skills,
+    projects: emp.projects,
+  });
 
   return (
     <div className="container max-w-3xl py-10 space-y-6">
@@ -110,6 +125,15 @@ export default function ProfilePage() {
           </Button>
         </div>
       </header>
+
+      <Card>
+        <CardContent className="p-4">
+          <ProfileCompletenessMeter
+            score={completeness.score}
+            missing={completeness.missing}
+          />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardContent className="flex items-center gap-4 p-5">

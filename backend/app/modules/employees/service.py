@@ -23,6 +23,7 @@ from app.modules.employees.schemas import (
     ProjectCreate,
     SkillCreate,
 )
+from app.modules.review.models import ReviewQueueItem, ReviewStatus
 from app.modules.users.models import User, UserRole
 
 
@@ -224,9 +225,45 @@ class EmployeeService:
     def ensure_can_edit(user: User, emp: Employee) -> None:
         if user.role == UserRole.ADMIN:
             return
-        if emp.user_id == user.id and emp.status != ProfileStatus.APPROVED:
+        if emp.user_id == user.id:
             return
-        raise ForbiddenError("You cannot edit this profile")
+        raise ForbiddenError("You can only edit your own profile")
+
+    async def flag_for_rereview_if_owner_edit(
+        self, user: User, emp_status_before: ProfileStatus, emp: Employee
+    ) -> bool:
+        """If a non-admin owner edited their previously-APPROVED profile,
+        flip the status back to PENDING_REVIEW and add a (deduped) review
+        queue item. Returns True if a re-review was triggered.
+
+        Caller passes the status *before* the edit so we know whether HR
+        previously signed off on this profile.
+        """
+        if user.role == UserRole.ADMIN:
+            return False
+        if emp.user_id != user.id:
+            return False
+        if emp_status_before != ProfileStatus.APPROVED:
+            return False
+
+        emp.status = ProfileStatus.PENDING_REVIEW
+        await self.db.flush()
+
+        existing_stmt = select(ReviewQueueItem.id).where(
+            ReviewQueueItem.employee_id == emp.id,
+            ReviewQueueItem.status == ReviewStatus.PENDING,
+        )
+        existing = (await self.db.execute(existing_stmt)).scalar_one_or_none()
+        if existing is None:
+            self.db.add(
+                ReviewQueueItem(
+                    employee_id=emp.id,
+                    submitted_by_user_id=user.id,
+                    status=ReviewStatus.PENDING,
+                )
+            )
+            await self.db.flush()
+        return True
 
     # ── Search candidate projection ────────────────────
 

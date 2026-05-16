@@ -109,7 +109,9 @@ async def update_employee(
     svc = EmployeeService(db)
     emp = await svc.get(employee_id)
     svc.ensure_can_edit(user, emp)
+    prior_status = emp.status
     updated = await svc.update(employee_id, payload)
+    await svc.flag_for_rereview_if_owner_edit(user, prior_status, updated)
     await db.commit()
     return EmployeeResponse.model_validate(updated)
 
@@ -128,9 +130,12 @@ async def replace_skills(
     svc = EmployeeService(db)
     emp = await svc.get(employee_id)
     svc.ensure_can_edit(user, emp)
+    prior_status = emp.status
     await svc.replace_skills(employee_id, skills)
+    fresh = await svc.get(employee_id)
+    await svc.flag_for_rereview_if_owner_edit(user, prior_status, fresh)
     await db.commit()
-    return EmployeeResponse.model_validate(await svc.get(employee_id))
+    return EmployeeResponse.model_validate(fresh)
 
 
 @router.put(
@@ -147,6 +152,9 @@ async def replace_projects(
     svc = EmployeeService(db)
     emp = await svc.get(employee_id)
     svc.ensure_can_edit(user, emp)
+    prior_status = emp.status
     await svc.replace_projects(employee_id, projects)
+    fresh = await svc.get(employee_id)
+    await svc.flag_for_rereview_if_owner_edit(user, prior_status, fresh)
     await db.commit()
-    return EmployeeResponse.model_validate(await svc.get(employee_id))
+    return EmployeeResponse.model_validate(fresh)
