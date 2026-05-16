@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import ConflictError, NotFoundError
-from app.modules.employees.models import ProfileStatus
+from app.modules.employees.models import Employee, ProfileStatus
 from app.modules.employees.service import EmployeeService
 from app.modules.review.models import ReviewQueueItem, ReviewStatus
 from app.modules.users.models import User
@@ -57,7 +57,16 @@ class ReviewService:
         item.reviewer_id = reviewer.id
         item.reviewer_notes = notes
         item.reviewed_at = datetime.now(timezone.utc)
-        await EmployeeService(self.db).set_status(item.employee_id, ProfileStatus.REJECTED)
+        
+        emp = await self.db.get(Employee, item.employee_id)
+        if emp and emp.user_id is None:
+            # If it's an unlinked profile (e.g. from bulk upload) and HR rejects it,
+            # don't save it in the database.
+            self.db.expunge(item)
+            await self.db.delete(emp)
+        else:
+            await EmployeeService(self.db).set_status(item.employee_id, ProfileStatus.REJECTED)
+            
         await self.db.commit()
         return item
 

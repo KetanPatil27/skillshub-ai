@@ -1,3 +1,4 @@
+import asyncio
 import io
 import json
 import logging
@@ -27,6 +28,11 @@ logger = logging.getLogger("skillshub.resumes")
 
 MAX_BYTES = 5 * 1024 * 1024
 BULK_MAX_FILES = 20
+
+# Pause between bulk-upload files. The HF Inference free tier rate-limits
+# bursts pretty aggressively (~10 req/min); without a small breather the
+# 2nd-Nth files commonly hit transient 429/503s.
+BULK_INTER_FILE_DELAY_SECONDS = 1.5
 
 
 def _parse_month(s: str | None) -> date | None:
@@ -71,6 +77,7 @@ class ResumeService:
         user: User,
         filename: str,
         content: bytes,
+        allow_fallback: bool = True,
     ) -> tuple[Employee, ExtractedProfile, list[InferredSkill], str | None]:
         if not filename.lower().endswith(".pdf"):
             raise BadRequestError("Only PDF files are accepted")
@@ -86,11 +93,11 @@ class ResumeService:
         resume_url = await self._upload_to_supabase(filename, content)
 
         # 3. AI extraction
-        extracted = await ai_service.extract_resume(raw_text)
+        extracted = await ai_service.extract_resume(raw_text, allow_fallback=allow_fallback)
 
         # 4. AI inference (degrades to [] on failure inside the service).
         inferred = await ai_service.infer_related_skills(
-            [s.model_dump() for s in extracted.skills]
+            [s.model_dump() for s in extracted.skills], allow_fallback=allow_fallback
         )
 
         # 5. Persist
@@ -246,13 +253,18 @@ class ResumeService:
         total = len(files)
 
         for idx, (filename, content) in enumerate(files):
+            # Pace requests after the first file so HF / Gemini free tiers
+            # don't hit burst rate limits between back-to-back resumes.
+            if idx > 0:
+                await asyncio.sleep(BULK_INTER_FILE_DELAY_SECONDS)
+
             yield (
                 "event: file_start\n"
                 f"data: {json.dumps({'index': idx, 'filename': filename})}\n\n"
             )
             try:
                 emp, extracted, inferred, _ = await self.upload_and_extract(
-                    user=user, filename=filename, content=content,
+                    user=user, filename=filename, content=content, allow_fallback=False
                 )
                 payload = {
                     "index": idx,
@@ -275,7 +287,14 @@ class ResumeService:
                     await self.db.rollback()
                 except Exception:
                     pass
-                msg = str(exc) or "Failed to process this resume"
+                # Surface a useful error string. BadRequestError exposes .message;
+                # everything else uses str(exc) — and we always include the
+                # exception type so debugging on the frontend isn't a black box.
+                msg = (
+                    getattr(exc, "message", None)
+                    or str(exc)
+                    or f"{type(exc).__name__}: failed to process this resume"
+                )
                 yield (
                     "event: file_error\n"
                     f"data: {json.dumps({'index': idx, 'filename': filename, 'message': msg})}\n\n"

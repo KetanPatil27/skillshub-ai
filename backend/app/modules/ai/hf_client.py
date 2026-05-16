@@ -45,6 +45,31 @@ def hf_available() -> bool:
     return bool(settings.HUGGINGFACEHUB_API_TOKEN)
 
 
+def _is_transient_hf_error(exc: BaseException) -> bool:
+    """Detect HF Inference API errors worth retrying after a short wait.
+    Covers 429 (rate-limit), 503 (model loading / overloaded), and timeouts."""
+    text = str(exc).lower()
+    code = getattr(exc, "status_code", None) or getattr(exc, "code", None)
+    if code in (429, 502, 503, 504):
+        return True
+    for marker in (
+        "rate limit",
+        "rate-limit",
+        "too many requests",
+        "service unavailable",
+        "model is currently loading",
+        "currently loading",
+        "overloaded",
+        "timeout",
+        "timed out",
+        "503",
+        "429",
+    ):
+        if marker in text:
+            return True
+    return False
+
+
 # ────────────────────────────────────────────────────────────────────────────
 # JSON extraction helpers
 # ────────────────────────────────────────────────────────────────────────────
@@ -206,12 +231,30 @@ def hf_generate(
     logger.info("HF request → %s (prompt ~%d chars, max_tokens=%d)", model, len(prompt), max_tokens)
     t0 = time.monotonic()
 
-    response = client.chat_completion(
-        model=model,
-        messages=messages,
-        temperature=max(temperature, 0.01),
-        max_tokens=max_tokens,
-    )
+    last_exc: BaseException | None = None
+    response = None
+    for attempt in range(1, 4):  # up to 3 tries with backoff
+        try:
+            response = client.chat_completion(
+                model=model,
+                messages=messages,
+                temperature=max(temperature, 0.01),
+                max_tokens=max_tokens,
+            )
+            break
+        except Exception as exc:
+            last_exc = exc
+            if attempt < 3 and _is_transient_hf_error(exc):
+                wait = 1.5 * attempt
+                logger.warning(
+                    "HF transient error on %s attempt %d (%s) — retrying in %.1fs",
+                    model, attempt, exc, wait,
+                )
+                time.sleep(wait)
+                continue
+            raise
+
+    assert response is not None  # narrow type for mypy; loop either returns or raises
 
     text = response.choices[0].message.content or ""
     elapsed = time.monotonic() - t0
@@ -294,7 +337,17 @@ def hf_generate_resume(prompt: str, *, temperature: float = 0.1) -> str:
                     "Resume extraction: API error on %s attempt %d: %s",
                     model, attempt, api_err,
                 )
-                break  # Don't retry API errors on same model, try next
+                # Retry transient errors (429/503/timeout) on the same model
+                # before moving on — HF Inference free tier is bursty.
+                if attempt < 2 and _is_transient_hf_error(api_err):
+                    wait = 1.5 * attempt
+                    logger.info(
+                        "Transient HF error — retrying %s in %.1fs",
+                        model, wait,
+                    )
+                    time.sleep(wait)
+                    continue
+                break  # Non-transient or out of attempts — try next model
 
     raise RuntimeError(
         f"Resume extraction failed on all HF models: "

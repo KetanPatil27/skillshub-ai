@@ -64,6 +64,7 @@ async def _call_ai(
     temperature: float = 0.2,
     response_mime_type: str = "application/json",
     label: str = "ai_call",
+    allow_fallback: bool = True,
 ) -> str:
     """Try Hugging Face first.  If HF fails (OOM, rate-limit, any error),
     fall back to Gemini.
@@ -81,12 +82,18 @@ async def _call_ai(
             return text
         except Exception as hf_exc:
             logger.warning(
-                "%s: HF failed (%s) — falling back to Gemini",
+                "%s: HF failed (%s) — %s",
                 label,
                 hf_exc,
+                "falling back to Gemini" if allow_fallback else "failing",
             )
+            if not allow_fallback:
+                raise UpstreamAIError(f"HF failed: {hf_exc}") from hf_exc
 
     # ── 2. Gemini fallback ──
+    if not allow_fallback:
+        raise UpstreamAIError("Gemini fallback disabled")
+
     client = get_client()
     try:
         logger.info("%s: using Gemini (%s)", label, model)
@@ -109,7 +116,7 @@ async def _call_ai(
 # 1. RESUME EXTRACTION
 # ────────────────────────────────────────────────────────────────────────────
 
-async def extract_resume(resume_text: str) -> ExtractedProfile:
+async def extract_resume(resume_text: str, allow_fallback: bool = True) -> ExtractedProfile:
     """Extract structured profile from resume text.
 
     Pipeline:
@@ -117,6 +124,7 @@ async def extract_resume(resume_text: str) -> ExtractedProfile:
     2. Gemini (final fallback if HF fails)
     """
     prompt = extraction_v1.build_prompt(resume_text)
+    hf_error: str | None = None
 
     # ── 1. Try HF dedicated resume model (Mistral) ──
     if hf_available():
@@ -127,12 +135,19 @@ async def extract_resume(resume_text: str) -> ExtractedProfile:
             logger.info("extract_resume: HF resume model succeeded")
             return ExtractedProfile.model_validate(data)
         except Exception as hf_exc:
+            hf_error = f"{type(hf_exc).__name__}: {hf_exc}"
             logger.warning(
-                "extract_resume: HF resume pipeline failed (%s) — trying Gemini",
+                "extract_resume: HF resume pipeline failed (%s) — %s",
                 hf_exc,
+                "trying Gemini" if allow_fallback else "failing",
             )
+            if not allow_fallback:
+                raise UpstreamAIError(f"AI extraction failed (HF tried first: {hf_error[:160]})") from hf_exc
 
     # ── 2. Gemini fallback ──
+    if not allow_fallback:
+        raise UpstreamAIError("AI extraction failed — HF not available and Gemini fallback disabled")
+
     client = get_client()
     try:
         logger.info("extract_resume: using Gemini (%s) as fallback", settings.GEMINI_MODEL_SHOWCASE)
@@ -147,14 +162,18 @@ async def extract_resume(resume_text: str) -> ExtractedProfile:
         return ExtractedProfile.model_validate(data)
     except Exception as e:
         logger.exception("extract_resume: Gemini call failed")
-        raise UpstreamAIError("Resume extraction failed on both HF and Gemini") from e
+        gemini_reason = _humanize_gemini_error(e)
+        detail = f"AI extraction failed — {gemini_reason}"
+        if hf_error:
+            detail += f" (HF tried first: {hf_error[:160]})"
+        raise UpstreamAIError(detail) from e
 
 
 # ────────────────────────────────────────────────────────────────────────────
 # 2. INFERRED SKILLS
 # ────────────────────────────────────────────────────────────────────────────
 
-async def infer_related_skills(explicit_skills: list[dict]) -> list[InferredSkill]:
+async def infer_related_skills(explicit_skills: list[dict], allow_fallback: bool = True) -> list[InferredSkill]:
     """Returns at most 5 high-confidence inferred skills."""
     if not explicit_skills:
         return []
@@ -165,6 +184,7 @@ async def infer_related_skills(explicit_skills: list[dict]) -> list[InferredSkil
             model=settings.GEMINI_MODEL_LIGHT,
             temperature=0.3,
             label="infer_related_skills",
+            allow_fallback=allow_fallback,
         )
     except Exception:
         logger.exception("infer_related_skills ai call failed")
