@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const HR_ROUTES = ["/search", "/directory", "/review"];
+const HR_ROUTES = ["/search", "/directory", "/review", "/analytics"];
 const EMPLOYEE_ROUTES = ["/profile", "/upload"];
 const PROTECTED = [...HR_ROUTES, ...EMPLOYEE_ROUTES];
 
@@ -104,6 +104,7 @@ export const config = {
     "/search/:path*",
     "/directory/:path*",
     "/review/:path*",
+    "/analytics/:path*",
     "/profile/:path*",
     "/upload/:path*",
   ],

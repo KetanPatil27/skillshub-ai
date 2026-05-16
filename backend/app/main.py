@@ -8,6 +8,7 @@ from fastapi.openapi.utils import get_openapi
 from app.common.filters import register_exception_handlers
 from app.common.middleware import RequestIdMiddleware
 from app.core.config import settings
+from app.modules.analytics.router import router as analytics_router
 from app.modules.auth.router import router as auth_router
 from app.modules.employees.router import router as employees_router
 from app.modules.resumes.router import router as resumes_router
@@ -59,6 +60,7 @@ app.include_router(employees_router)
 app.include_router(resumes_router)
 app.include_router(review_router)
 app.include_router(search_router)
+app.include_router(analytics_router)
 
 
 @app.get("/", tags=["Meta"], summary="Health check")

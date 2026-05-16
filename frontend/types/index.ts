@@ -179,3 +179,28 @@ export interface TeamBuildResult {
   rationale: string;
   alternates: { employee_id: string; name: string; would_replace: string }[];
 }
+
+export interface SkillStat {
+  name: string;
+  category: SkillCategory | string;
+  count: number;
+  expert_count: number;
+}
+
+export interface LocationStat {
+  name: string;
+  count: number;
+}
+
+export interface AnalyticsOverview {
+  total_approved: number;
+  total_pending: number;
+  total_skills_tracked: number;
+  inferred_ratio: number;
+  allocation_breakdown: Record<string, number>;
+  top_skills: SkillStat[];
+  scarce_skills: SkillStat[];
+  category_breakdown: Record<string, number>;
+  location_breakdown: LocationStat[];
+  hiring_recommendations: string[];
+}
