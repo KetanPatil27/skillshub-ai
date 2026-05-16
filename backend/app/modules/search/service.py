@@ -4,12 +4,16 @@ from datetime import date, timedelta
 from typing import AsyncIterator
 from uuid import UUID
 
+from sqlalchemy import desc, func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import NotFoundError
 from app.modules.ai import service as ai_service
 from app.modules.ai.schemas import SearchResult, TeamBuildResult
 from app.modules.employees.service import EmployeeService
-from app.modules.search.models import SearchQueryLog
+from app.modules.search.models import SavedSearch, SearchQueryLog
+from app.modules.search.schemas import RecentSearchItem
 
 logger = logging.getLogger("skillshub.search")
 
@@ -120,3 +124,76 @@ class SearchService:
     async def build_team(self, brief: str, team_size: int) -> TeamBuildResult:
         candidates = await self._candidates()
         return await ai_service.build_team(brief, candidates, team_size)
+
+    # ── Search history & saved searches ──────────────────────────────
+
+    async def list_recent(self, user_id: UUID, limit: int = 10) -> list[RecentSearchItem]:
+        """Deduped list of this user's most recent search queries.
+
+        Group by query_text so a user that ran the same search 3 times sees
+        one row with use_count=3 rather than three identical rows.
+        """
+        stmt = (
+            select(
+                SearchQueryLog.query_text,
+                func.max(SearchQueryLog.created_at).label("last_used_at"),
+                func.count(SearchQueryLog.id).label("use_count"),
+            )
+            .where(SearchQueryLog.user_id == user_id)
+            .group_by(SearchQueryLog.query_text)
+            .order_by(desc("last_used_at"))
+            .limit(limit)
+        )
+        rows = (await self.db.execute(stmt)).all()
+        return [
+            RecentSearchItem(
+                query_text=q,
+                last_used_at=last,
+                use_count=int(count),
+            )
+            for q, last, count in rows
+        ]
+
+    async def list_saved(self, user_id: UUID) -> list[SavedSearch]:
+        stmt = (
+            select(SavedSearch)
+            .where(SavedSearch.user_id == user_id)
+            .order_by(SavedSearch.created_at.desc())
+        )
+        return list((await self.db.execute(stmt)).scalars().all())
+
+    async def create_saved(
+        self, user_id: UUID, query_text: str, label: str | None
+    ) -> SavedSearch:
+        """Idempotent: saving the same query twice returns the existing row."""
+        row = SavedSearch(
+            user_id=user_id, query_text=query_text.strip(), label=label
+        )
+        self.db.add(row)
+        try:
+            await self.db.commit()
+            await self.db.refresh(row)
+            return row
+        except IntegrityError:
+            await self.db.rollback()
+            stmt = (
+                select(SavedSearch)
+                .where(SavedSearch.user_id == user_id)
+                .where(SavedSearch.query_text == query_text.strip())
+            )
+            existing = (await self.db.execute(stmt)).scalar_one_or_none()
+            if existing is None:
+                raise
+            # Update the label if the caller provided a new one.
+            if label is not None and existing.label != label:
+                existing.label = label
+                await self.db.commit()
+                await self.db.refresh(existing)
+            return existing
+
+    async def delete_saved(self, user_id: UUID, saved_id: UUID) -> None:
+        row = await self.db.get(SavedSearch, saved_id)
+        if row is None or row.user_id != user_id:
+            raise NotFoundError("Saved search not found")
+        await self.db.delete(row)
+        await self.db.commit()

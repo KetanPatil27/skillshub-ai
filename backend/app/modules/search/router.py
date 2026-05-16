@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, Query
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, status
 from fastapi.responses import StreamingResponse
 
 from app.common.decorators import require_admin
@@ -6,6 +8,9 @@ from app.common.dependencies import CurrentUser, DbSession
 from app.modules.ai.schemas import TeamBuildResult
 from app.modules.search.schemas import (
     JDSearchRequest,
+    RecentSearchItem,
+    SavedSearchCreate,
+    SavedSearchResponse,
     SearchRequest,
     SearchResult,
     TeamBuildRequest,
@@ -100,3 +105,62 @@ async def build_team(
     _admin=Depends(require_admin),
 ) -> TeamBuildResult:
     return await SearchService(db).build_team(payload.brief, payload.team_size)
+
+
+@router.get(
+    "/history",
+    response_model=list[RecentSearchItem],
+    summary="Current user's recent search queries (deduped, HR only)",
+)
+async def search_history(
+    user: CurrentUser,
+    db: DbSession,
+    _admin=Depends(require_admin),
+) -> list[RecentSearchItem]:
+    return await SearchService(db).list_recent(user.id, limit=10)
+
+
+@router.get(
+    "/saved",
+    response_model=list[SavedSearchResponse],
+    summary="Current user's saved searches (HR only)",
+)
+async def list_saved(
+    user: CurrentUser,
+    db: DbSession,
+    _admin=Depends(require_admin),
+) -> list[SavedSearchResponse]:
+    rows = await SearchService(db).list_saved(user.id)
+    return [SavedSearchResponse.model_validate(r) for r in rows]
+
+
+@router.post(
+    "/saved",
+    response_model=SavedSearchResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Save a search query (HR only). Idempotent on (user, query_text).",
+)
+async def create_saved(
+    payload: SavedSearchCreate,
+    user: CurrentUser,
+    db: DbSession,
+    _admin=Depends(require_admin),
+) -> SavedSearchResponse:
+    row = await SearchService(db).create_saved(
+        user.id, payload.query_text, payload.label
+    )
+    return SavedSearchResponse.model_validate(row)
+
+
+@router.delete(
+    "/saved/{saved_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a saved search (HR only, must own it)",
+)
+async def delete_saved(
+    saved_id: UUID,
+    user: CurrentUser,
+    db: DbSession,
+    _admin=Depends(require_admin),
+) -> None:
+    await SearchService(db).delete_saved(user.id, saved_id)

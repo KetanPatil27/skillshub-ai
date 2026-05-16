@@ -204,3 +204,16 @@ export interface AnalyticsOverview {
   location_breakdown: LocationStat[];
   hiring_recommendations: string[];
 }
+
+export interface RecentSearchItem {
+  query_text: string;
+  last_used_at: string;
+  use_count: number;
+}
+
+export interface SavedSearch {
+  id: string;
+  query_text: string;
+  label?: string | null;
+  created_at: string;
+}

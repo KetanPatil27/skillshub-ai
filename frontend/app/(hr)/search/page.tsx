@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { FileText, Loader2, Search as SearchIcon, Sparkles, Users } from "lucide-react";
+import { FileText, Loader2, Search as SearchIcon, Sparkles, Star, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -9,6 +9,7 @@ import { EmployeeSheet } from "@/components/shared/employee-sheet";
 import { StreamingIndicator } from "@/components/shared/streaming-indicator";
 import { Avatar } from "@/components/shared/avatar";
 import { ResultCard } from "@/components/features/search/result-card";
+import { SearchHistory } from "@/components/features/search/search-history";
 import { SearchInput } from "@/components/features/search/search-input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,13 +17,41 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useEmployees } from "@/hooks/use-employees";
 import { useSearch, useTeamBuilder } from "@/hooks/use-search";
+import { useSaveSearch, useSavedSearches } from "@/hooks/use-search-history";
 import { errorMessage } from "@/lib/api";
 
 export default function SearchPage() {
   const [openId, setOpenId] = useState<string | null>(null);
+  const [lastQuery, setLastQuery] = useState<string | null>(null);
   const search = useSearch();
+  const saveSearch = useSaveSearch();
+  const savedSearches = useSavedSearches();
   const totalProfilesQ = useEmployees({ status: "APPROVED", page_size: 1 });
   const totalProfiles = totalProfilesQ.data?.total ?? 0;
+
+  function runSearch(q: string) {
+    setLastQuery(q);
+    search.run(q, 5);
+  }
+
+  function clearSearch() {
+    search.reset();
+    setLastQuery(null);
+  }
+
+  async function saveCurrentSearch() {
+    if (!lastQuery) return;
+    try {
+      await saveSearch.mutateAsync({ query_text: lastQuery, label: null });
+      toast.success("Saved to your searches.");
+    } catch (e) {
+      toast.error(errorMessage(e));
+    }
+  }
+
+  const alreadySaved =
+    !!lastQuery &&
+    !!savedSearches.data?.some((s) => s.query_text === lastQuery);
 
   return (
     <div className="container max-w-5xl py-8">
@@ -58,9 +87,10 @@ export default function SearchPage() {
                 </p>
                 <SearchInput
                   hero
-                  onSubmit={(q) => search.run(q, 5)}
+                  onSubmit={runSearch}
                   busy={search.phase === "streaming"}
                 />
+                <SearchHistory onPick={runSearch} />
               </motion.section>
             ) : (
               <motion.section
@@ -70,7 +100,7 @@ export default function SearchPage() {
                 className="space-y-6"
               >
                 <SearchInput
-                  onSubmit={(q) => search.run(q, 5)}
+                  onSubmit={runSearch}
                   busy={search.phase === "streaming"}
                 />
 
@@ -90,14 +120,30 @@ export default function SearchPage() {
                     <span className="text-sm text-destructive">{search.error}</span>
                   )}
                   {(search.results.length > 0 || search.phase !== "idle") && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="ml-auto"
-                      onClick={search.reset}
-                    >
-                      Clear
-                    </Button>
+                    <div className="ml-auto flex items-center gap-1">
+                      {lastQuery && search.phase !== "streaming" && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={saveCurrentSearch}
+                          disabled={alreadySaved || saveSearch.isPending}
+                          aria-label={alreadySaved ? "Already saved" : "Save this search"}
+                        >
+                          <Star
+                            className={
+                              "mr-1.5 h-3.5 w-3.5 " +
+                              (alreadySaved
+                                ? "fill-amber-400 text-amber-500"
+                                : "")
+                            }
+                          />
+                          {alreadySaved ? "Saved" : "Save search"}
+                        </Button>
+                      )}
+                      <Button variant="ghost" size="sm" onClick={clearSearch}>
+                        Clear
+                      </Button>
+                    </div>
                   )}
                 </div>
 
