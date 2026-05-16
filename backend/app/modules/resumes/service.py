@@ -1,8 +1,9 @@
 import io
+import json
 import logging
 import uuid
 from datetime import date, datetime
-from typing import Any
+from typing import Any, AsyncIterator
 
 import httpx
 from pypdf import PdfReader
@@ -25,6 +26,7 @@ from app.modules.users.models import User, UserRole
 logger = logging.getLogger("skillshub.resumes")
 
 MAX_BYTES = 5 * 1024 * 1024
+BULK_MAX_FILES = 20
 
 
 def _parse_month(s: str | None) -> date | None:
@@ -214,6 +216,76 @@ class ResumeService:
         emp.resume_url = resume_url
         await self.db.flush()
         return await emp_svc.get(emp.id)
+
+    # ── bulk ────────────────────────────────────────
+
+    async def bulk_upload_stream(
+        self,
+        *,
+        user: User,
+        files: list[tuple[str, bytes]],
+    ) -> AsyncIterator[str]:
+        """Process multiple resume PDFs sequentially, yielding SSE lines.
+
+        Sequential (not concurrent) on purpose: HF / Gemini free tiers rate-
+        limit aggressively, and a single failure shouldn't poison the batch.
+        Each file gets its own try/except + rollback so file 3 failing
+        doesn't undo files 1-2 (which have already been committed by
+        upload_and_extract).
+
+        Event grammar:
+          event: file_start   {"index", "filename"}
+          event: file_done    {"index", "filename", "employee_id",
+                              "extracted_name", "skills_count",
+                              "projects_count", "inferred_count"}
+          event: file_error   {"index", "filename", "message"}
+          event: done         {"total", "success", "errors"}
+        """
+        success = 0
+        errors = 0
+        total = len(files)
+
+        for idx, (filename, content) in enumerate(files):
+            yield (
+                "event: file_start\n"
+                f"data: {json.dumps({'index': idx, 'filename': filename})}\n\n"
+            )
+            try:
+                emp, extracted, inferred, _ = await self.upload_and_extract(
+                    user=user, filename=filename, content=content,
+                )
+                payload = {
+                    "index": idx,
+                    "filename": filename,
+                    "employee_id": str(emp.id),
+                    "extracted_name": extracted.full_name,
+                    "skills_count": len(extracted.skills),
+                    "projects_count": len(extracted.projects),
+                    "inferred_count": len(inferred),
+                }
+                yield (
+                    "event: file_done\n"
+                    f"data: {json.dumps(payload)}\n\n"
+                )
+                success += 1
+            except Exception as exc:
+                logger.exception("bulk: %s failed", filename)
+                # Make sure the session is clean for the next file.
+                try:
+                    await self.db.rollback()
+                except Exception:
+                    pass
+                msg = str(exc) or "Failed to process this resume"
+                yield (
+                    "event: file_error\n"
+                    f"data: {json.dumps({'index': idx, 'filename': filename, 'message': msg})}\n\n"
+                )
+                errors += 1
+
+        yield (
+            "event: done\n"
+            f"data: {json.dumps({'total': total, 'success': success, 'errors': errors})}\n\n"
+        )
 
     async def _upload_to_supabase(self, filename: str, content: bytes) -> str | None:
         """Best-effort upload to Supabase Storage. Returns the public URL.

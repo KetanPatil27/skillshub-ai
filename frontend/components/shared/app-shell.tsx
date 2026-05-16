@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart3, LogOut, Moon, Search, Sparkles, Sun, Upload, Users, Inbox, UserCircle } from "lucide-react";
+import { BarChart3, FileUp, LogOut, Moon, Search, Sparkles, Sun, Upload, Users, Inbox, UserCircle } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -16,6 +16,7 @@ const HR_NAV: NavItem[] = [
   { href: "/search", label: "Search", icon: Search },
   { href: "/directory", label: "Directory", icon: Users },
   { href: "/review", label: "Review Queue", icon: Inbox },
+  { href: "/bulk-upload", label: "Bulk Upload", icon: FileUp },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
 ];
 

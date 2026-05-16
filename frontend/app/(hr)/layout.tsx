@@ -4,6 +4,7 @@ import { useEffect, Suspense } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { toast } from "sonner";
 import { AppShell } from "@/components/shared/app-shell";
+import { GlobalShortcuts } from "@/components/shared/global-shortcuts";
 
 function MismatchNotice() {
   const searchParams = useSearchParams();
@@ -29,6 +30,7 @@ export default function HrLayout({ children }: { children: React.ReactNode }) {
       <Suspense fallback={null}>
         <MismatchNotice />
       </Suspense>
+      <GlobalShortcuts />
       {children}
     </AppShell>
   );
