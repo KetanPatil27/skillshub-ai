@@ -375,11 +375,23 @@ Swap any of these via `.env` — no code change needed.
 
 ---
 
-## 📚 Docs
+## 📚 Docs & Project Materials
 
-- 📘 [SkillsHub_Phase1_Guide.docx](docs/SkillsHub_Phase1_Guide.docx) — the original architecture + flow walkthrough.
-- 📗 [SkillsHub_Phase2_Guide.docx](docs/SkillsHub_Phase2_Guide.docx) — what was added, AI models tested, problems solved.
-- 🎤 [SkillsHub_Pitch_Deck.pptx](docs/SkillsHub_Pitch_Deck.pptx) — judge-ready slide deck.
+All project documents, guides, screenshots, demo videos, and reference material are mirrored in a shared Google Drive folder:
+
+🔗 **[📂 Open the SkillsHub Drive folder](https://drive.google.com/drive/folders/1T_fyEQC8E9uAY85FYae75Em8T1vTxu4B?usp=sharing)**
+
+
+### 🗂️ Also available in the Drive folder
+
+- 🖼️ Project screenshots — Search, Upload, Review Queue, Analytics, Bulk Upload, Compare, Profile pages.
+- 🎬 Demo recordings / walkthrough videos.
+- 📑 Phase 1 + Phase 2 guides (PDF + DOCX copies).
+- 🎤 Pitch deck (PPTX + PDF export).
+- 📊 Architecture diagrams and AI pipeline visuals.
+- 📝 Any additional notes, sketches, and reference material used during the build.
+
+> 💡 **Tip:** If you're a judge, mentor, or new teammate — start with the [Drive folder](https://drive.google.com/drive/folders/1T_fyEQC8E9uAY85FYae75Em8T1vTxu4B?usp=sharing) for the visual tour, then dive into the Phase 1 + Phase 2 guides for the deep technical walkthrough.
 
 ---
 
