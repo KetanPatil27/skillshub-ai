@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart3, FileUp, LogOut, Moon, Search, Sparkles, Sun, Upload, Users, Inbox, UserCircle } from "lucide-react";
+import { BarChart3, FileUp, LogOut, Moon, Search, Sparkles, Sun, Upload, Users, Inbox, UserCircle, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -8,7 +8,18 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import { useReviewQueue } from "@/hooks/use-review-queue";
 import { cn } from "@/lib/utils";
+
+function ReviewBadge() {
+  const { data } = useReviewQueue();
+  if (!data?.total) return null;
+  return (
+    <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-medium text-destructive-foreground">
+      {data.total}
+    </span>
+  );
+}
 
 type NavItem = { href: string; label: string; icon: React.ComponentType<{ className?: string }> };
 
@@ -18,6 +29,7 @@ const HR_NAV: NavItem[] = [
   { href: "/review", label: "Review Queue", icon: Inbox },
   { href: "/bulk-upload", label: "Bulk Upload", icon: FileUp },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 const EMP_NAV: NavItem[] = [
@@ -47,6 +59,7 @@ export function AppShell({
           {nav.map((n) => {
             const active = pathname.startsWith(n.href);
             const Icon = n.icon;
+            const isReview = n.label === "Review Queue";
             return (
               <Link
                 key={n.href}
@@ -59,7 +72,8 @@ export function AppShell({
                 )}
               >
                 <Icon className="h-4 w-4" />
-                {n.label}
+                <span className="flex-1">{n.label}</span>
+                {isReview && <ReviewBadge />}
               </Link>
             );
           })}

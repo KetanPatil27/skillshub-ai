@@ -63,7 +63,17 @@ export default function ReviewItemPage({ params }: { params: { id: string } }) {
     try {
       await approve.mutateAsync(undefined);
       toast.success("Profile approved.");
-      router.push("/review");
+      
+      const confetti = (await import("canvas-confetti")).default;
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+      
+      setTimeout(() => {
+        router.push("/review");
+      }, 1500);
     } catch (e) {
       toast.error(errorMessage(e));
     }

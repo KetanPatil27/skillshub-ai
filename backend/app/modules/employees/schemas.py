@@ -84,6 +84,7 @@ class EmployeeResponse(EmployeeBase):
     id: UUID
     user_id: UUID | None = None
     resume_url: str | None = None
+    has_resume: bool = False
     status: ProfileStatus
     created_at: datetime
     updated_at: datetime
@@ -101,6 +102,7 @@ class EmployeeListItem(BaseModel):
     allocation_status: AllocationStatus
     status: ProfileStatus
     top_skills: list[str] = Field(default_factory=list)
+    updated_at: datetime
 
 
 class EmployeeListResponse(BaseModel):

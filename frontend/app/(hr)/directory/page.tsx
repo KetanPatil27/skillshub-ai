@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { formatDistanceToNow } from "date-fns";
 
 import { EmployeeSheet } from "@/components/shared/employee-sheet";
 import { Avatar } from "@/components/shared/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -15,23 +17,44 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RecentlyViewed } from "@/components/shared/recently-viewed";
 import { useEmployees, type EmployeeFilters } from "@/hooks/use-employees";
 import { allocationTone, cn } from "@/lib/utils";
 
 export default function DirectoryPage() {
   const [filters, setFilters] = useState<EmployeeFilters>({ page: 1, page_size: 12 });
   const [openId, setOpenId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const { data, isLoading } = useEmployees(filters);
 
   function patch(p: Partial<EmployeeFilters>) {
     setFilters((f) => ({ ...f, ...p, page: 1 }));
   }
 
+  function toggleCompare(id: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  }
+
   return (
     <div className="container max-w-6xl py-8">
-      <header className="mb-6">
-        <h1 className="text-2xl font-semibold">Directory</h1>
-        <p className="text-sm text-muted-foreground">All employee profiles in SkillsHub.</p>
+      <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold">Directory</h1>
+          <p className="text-sm text-muted-foreground">All employee profiles in SkillsHub.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          {selectedIds.length > 0 && (
+            <Button asChild variant="secondary" size="sm">
+              <Link href={`/compare?ids=${selectedIds.join(",")}`}>
+                Compare {selectedIds.length} selected
+              </Link>
+            </Button>
+          )}
+          <RecentlyViewed onSelect={(id) => setOpenId(id)} />
+        </div>
       </header>
 
       <Card className="mb-6">
@@ -84,21 +107,36 @@ export default function DirectoryPage() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {(data?.items ?? []).map((e) => {
               const tone = allocationTone(e.allocation_status);
+              const isSelected = selectedIds.includes(e.id);
               return (
                 <Card
                   key={e.id}
-                  className="cursor-pointer transition-shadow hover:shadow-md"
+                  className={cn("cursor-pointer transition-shadow hover:shadow-md relative overflow-hidden", isSelected && "ring-2 ring-primary")}
                   onClick={() => setOpenId(e.id)}
                 >
                   <CardContent className="space-y-3 p-4">
-                    <div className="flex items-center gap-3">
-                      <Avatar name={e.full_name} size={42} />
-                      <div className="flex-1 min-w-0">
-                        <div className="truncate font-semibold">{e.full_name}</div>
-                        <div className="truncate text-xs text-muted-foreground">
-                          {e.headline} {e.location && `· ${e.location}`}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Avatar name={e.full_name} size={42} />
+                        <div className="flex-1 min-w-0">
+                          <div className="truncate font-semibold">{e.full_name}</div>
+                          <div className="truncate text-xs text-muted-foreground">
+                            {e.headline} {e.location && `· ${e.location}`}
+                          </div>
+                          <div className="truncate text-[10px] text-muted-foreground mt-0.5">
+                            Updated {formatDistanceToNow(new Date(e.updated_at), { addSuffix: true })}
+                          </div>
                         </div>
                       </div>
+                      <button
+                        type="button"
+                        onClick={(ev) => toggleCompare(e.id, ev)}
+                        className={cn("shrink-0 h-5 w-5 rounded border flex items-center justify-center text-primary-foreground text-xs font-bold transition-colors", isSelected ? "bg-primary border-primary" : "border-muted-foreground/30 hover:border-primary")}
+                      >
+                        {isSelected && "✓"}
+                      </button>
+                    </div>
+                    <div className="flex items-center">
                       <span
                         className={cn(
                           "inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px]",

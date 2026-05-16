@@ -67,3 +67,25 @@
   background-size: 200% 100%;
   animation: shimmer 2.4s linear infinite;
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-region, .print-region * {
+    visibility: visible;
+  }
+  .print-region {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

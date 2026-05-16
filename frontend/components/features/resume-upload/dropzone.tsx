@@ -24,6 +24,8 @@ export function Dropzone({
     },
   });
 
+  const { onAnimationStart, ...dropzoneProps } = getRootProps() as any;
+
   return (
     <motion.div
       whileHover={{ scale: 1.01 }}
@@ -36,7 +38,7 @@ export function Dropzone({
             : "hsl(var(--border))",
       }}
       transition={{ duration: 0.18 }}
-      {...getRootProps()}
+      {...dropzoneProps}
       className={cn(
         "flex cursor-pointer flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed p-12 text-center transition-colors",
         isDragActive && "bg-primary/5",

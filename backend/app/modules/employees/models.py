@@ -9,6 +9,7 @@ from sqlalchemy import (
     Enum,
     ForeignKey,
     Index,
+    LargeBinary,
     Numeric,
     String,
     Text,
@@ -71,6 +72,8 @@ class Employee(Base):
     last_project_end_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     bio: Mapped[str | None] = mapped_column(Text, nullable=True)
     resume_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    resume_content: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True)
+    resume_filename: Mapped[str | None] = mapped_column(String(255), nullable=True)
     raw_extracted_json: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     status: Mapped[ProfileStatus] = mapped_column(
         Enum(ProfileStatus, name="profile_status"),
@@ -81,6 +84,10 @@ class Employee(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )
+
+    @property
+    def has_resume(self) -> bool:
+        return self.resume_content is not None or self.resume_url is not None
 
     user = relationship("User", back_populates="employee")
     skills = relationship(

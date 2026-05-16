@@ -106,6 +106,8 @@ class ResumeService:
             extracted=extracted,
             inferred=inferred,
             resume_url=resume_url,
+            resume_filename=filename,
+            resume_content=content,
         )
 
         # 6. Review queue
@@ -131,6 +133,8 @@ class ResumeService:
         extracted: ExtractedProfile,
         inferred: list[InferredSkill],
         resume_url: str | None,
+        resume_filename: str | None = None,
+        resume_content: bytes | None = None,
     ) -> Employee:
         emp_svc = EmployeeService(self.db)
 
@@ -201,6 +205,9 @@ class ResumeService:
             existing.status = ProfileStatus.PENDING_REVIEW
             if resume_url:
                 existing.resume_url = resume_url
+            if resume_content:
+                existing.resume_content = resume_content
+                existing.resume_filename = resume_filename
             await self.db.flush()
             await emp_svc.replace_skills(existing.id, skill_payloads)
             await emp_svc.replace_projects(existing.id, project_payloads)
@@ -221,6 +228,8 @@ class ResumeService:
         )
         emp.raw_extracted_json = extracted.model_dump(mode="json")
         emp.resume_url = resume_url
+        emp.resume_content = resume_content
+        emp.resume_filename = resume_filename
         await self.db.flush()
         return await emp_svc.get(emp.id)
 

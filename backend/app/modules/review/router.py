@@ -29,7 +29,17 @@ router = APIRouter(
 async def list_queue(db: DbSession) -> ReviewListResponse:
     items, total = await ReviewService(db).list_pending()
     return ReviewListResponse(
-        items=[ReviewQueueListItem.model_validate(i) for i in items],
+        items=[
+            ReviewQueueListItem(
+                **{
+                    c.key: getattr(i, c.key)
+                    for c in i.__table__.columns
+                },
+                employee_name=i.employee.full_name if i.employee else None,
+                employee_headline=i.employee.headline if i.employee else None,
+            )
+            for i in items
+        ],
         total=total,
     )
 

@@ -1,10 +1,12 @@
 "use client";
 
-import { Briefcase, MapPin } from "lucide-react";
-
+import { useCallback, useEffect } from "react";
+import { Briefcase, MapPin, Printer, FileText, Loader2 } from "lucide-react";
+import { api } from "@/lib/api";
 import { Avatar } from "@/components/shared/avatar";
 import { SkillPill } from "@/components/shared/skill-pill";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -27,9 +29,19 @@ export function EmployeeSheet({
 }) {
   const { data: emp, isLoading } = useEmployee(employeeId ?? undefined);
 
+  useEffect(() => {
+    if (emp) {
+      const recent = JSON.parse(localStorage.getItem("recent_employees") || "[]");
+      const filtered = recent.filter((r: any) => r.id !== emp.id);
+      const next = [{ id: emp.id, name: emp.full_name, headline: emp.headline }, ...filtered].slice(0, 10);
+      localStorage.setItem("recent_employees", JSON.stringify(next));
+      window.dispatchEvent(new Event("recent_employees_updated"));
+    }
+  }, [emp]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto">
+      <DialogContent className="max-h-[85vh] overflow-y-auto print-region print:max-h-none print:shadow-none print:border-none">
         {isLoading || !emp ? (
           <div className="space-y-4">
             <Skeleton className="h-12 w-1/2" />
@@ -47,6 +59,36 @@ export function EmployeeSheet({
                   <DialogDescription>{emp.headline}</DialogDescription>
                 </div>
                 <AllocationBadge status={emp.allocation_status} />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="no-print shrink-0"
+                  title={emp.has_resume ? "View Original Resume" : "Print Profile"}
+                  onClick={async () => {
+                    if (emp.has_resume) {
+                      try {
+                        const res = await api.get(`/employees/${emp.id}/resume`, {
+                          responseType: "blob",
+                        });
+                        const blob = new Blob([res.data], { type: "application/pdf" });
+                        const url = URL.createObjectURL(blob);
+                        window.open(url, "_blank");
+                        // Clean up the blob URL after a short delay
+                        setTimeout(() => URL.revokeObjectURL(url), 30000);
+                      } catch {
+                        window.print();
+                      }
+                    } else {
+                      window.print();
+                    }
+                  }}
+                >
+                  {emp.has_resume ? (
+                    <FileText className="h-4 w-4" />
+                  ) : (
+                    <Printer className="h-4 w-4" />
+                  )}
+                </Button>
               </div>
             </DialogHeader>
             <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">

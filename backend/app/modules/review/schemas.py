@@ -18,6 +18,8 @@ class ReviewQueueListItem(BaseModel):
     reviewer_notes: str | None
     created_at: datetime
     reviewed_at: datetime | None
+    employee_name: str | None = None
+    employee_headline: str | None = None
 
 
 class ReviewQueueItemWithEmployee(BaseModel):

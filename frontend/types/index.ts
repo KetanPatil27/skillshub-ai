@@ -90,6 +90,7 @@ export interface Employee {
   last_project_end_date?: string | null;
   bio?: string | null;
   resume_url?: string | null;
+  has_resume: boolean;
   status: ProfileStatus;
   skills: Skill[];
   projects: Project[];
@@ -106,6 +107,7 @@ export interface EmployeeListItem {
   allocation_status: AllocationStatus;
   status: ProfileStatus;
   top_skills: string[];
+  updated_at: string;
 }
 
 export interface EmployeeListResponse {
@@ -160,6 +162,8 @@ export interface ReviewQueueItem {
   reviewer_notes?: string | null;
   created_at: string;
   reviewed_at?: string | null;
+  employee_name?: string | null;
+  employee_headline?: string | null;
 }
 
 export interface ReviewQueueItemWithEmployee {

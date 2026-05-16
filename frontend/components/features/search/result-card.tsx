@@ -1,16 +1,12 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Quote } from "lucide-react";
+import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronDown, Lightbulb, Quote, ShieldCheck } from "lucide-react";
 
 import { Avatar } from "@/components/shared/avatar";
 import { ScoreBadge } from "@/components/shared/score-badge";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { allocationTone, cn } from "@/lib/utils";
 import type { SearchResult } from "@/types";
 
@@ -23,7 +19,9 @@ export function ResultCard({
   index: number;
   onOpen?: (id: string) => void;
 }) {
+  const [showEvidence, setShowEvidence] = useState(false);
   const tone = allocationTone(result.allocation_status ?? "ALLOCATED");
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -72,29 +70,23 @@ export function ResultCard({
             </div>
 
             {result.evidence_snippets.length > 0 && (
-              <Tooltip>
-                <TooltipTrigger
-                  asChild
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <button
-                    type="button"
-                    className="inline-flex items-center gap-1 text-xs text-primary underline-offset-4 hover:underline"
-                  >
-                    <Quote className="h-3 w-3" /> Why this match?
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="max-w-md space-y-2">
-                  <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    Evidence
-                  </div>
-                  {result.evidence_snippets.map((s, i) => (
-                    <p key={i} className="text-[12px] italic leading-snug">
-                      &ldquo;…{s}…&rdquo;
-                    </p>
-                  ))}
-                </TooltipContent>
-              </Tooltip>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowEvidence((v) => !v);
+                }}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+              >
+                <Lightbulb className="h-3.5 w-3.5" />
+                Why this match?
+                <ChevronDown
+                  className={cn(
+                    "h-3 w-3 transition-transform duration-200",
+                    showEvidence && "rotate-180",
+                  )}
+                />
+              </button>
             )}
           </div>
 
@@ -102,7 +94,70 @@ export function ResultCard({
             <ScoreBadge score={result.match_score} size={72} />
           </div>
         </CardContent>
+
+        {/* ── Evidence Card ────────────────────────── */}
+        <AnimatePresence>
+          {showEvidence && result.evidence_snippets.length > 0 && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
+              className="overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="border-t bg-muted/40 px-5 py-4 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                  Evidence & Match Reasoning
+                </div>
+
+                {/* Match reason */}
+                <div className="rounded-lg border bg-background p-3">
+                  <p className="text-sm font-medium text-foreground mb-1">Match Reason</p>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    {result.reason}
+                  </p>
+                </div>
+
+                {/* Evidence snippets */}
+                <div className="space-y-2">
+                  {result.evidence_snippets.map((snippet, i) => (
+                    <div
+                      key={i}
+                      className="rounded-lg border border-primary/20 bg-primary/5 p-3 flex gap-2"
+                    >
+                      <Quote className="h-4 w-4 text-primary/60 shrink-0 mt-0.5" />
+                      <p className="text-sm leading-relaxed text-foreground/80 italic">
+                        &ldquo;{snippet}&rdquo;
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Matched skills */}
+                {result.matched_skill_names.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1.5">Matched Skills</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {result.matched_skill_names.map((s) => (
+                        <span
+                          key={s}
+                          className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary"
+                        >
+                          <ShieldCheck className="h-3 w-3" />
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </Card>
     </motion.div>
   );
 }
+

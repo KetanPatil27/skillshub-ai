@@ -6,6 +6,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import type { Skill } from "@/types";
 import { cn, proficiencyTone } from "@/lib/utils";
 
+import { useRouter } from "next/navigation";
+
 export function SkillPill({
   skill,
   highlighted,
@@ -15,18 +17,28 @@ export function SkillPill({
   highlighted?: boolean;
   onClick?: () => void;
 }) {
+  const router = useRouter();
   const tone = proficiencyTone(skill.proficiency);
   const yrs =
     skill.years_experience !== null && skill.years_experience !== undefined
       ? `${Number(skill.years_experience)}y`
       : null;
 
+  const handleClick = (e: React.MouseEvent) => {
+    if (onClick) {
+      onClick();
+    } else {
+      router.push(`/directory?q=${encodeURIComponent(skill.name)}`);
+      // Close any open modals if possible, though reloading the route usually handles it.
+    }
+  };
+
   const base = (
     <button
       type="button"
-      onClick={onClick}
+      onClick={handleClick}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors",
+        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors hover:brightness-95",
         tone,
         skill.is_inferred && "bg-inferred text-inferred-foreground ring-1 ring-inferred-foreground/30",
         highlighted && "ring-2 ring-primary ring-offset-1 ring-offset-background",

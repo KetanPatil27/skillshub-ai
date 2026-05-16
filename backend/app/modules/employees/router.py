@@ -1,7 +1,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, Response, status
 
 from app.common.dependencies import CurrentUser, DbSession
 from app.modules.employees.schemas import (
@@ -59,6 +59,7 @@ async def list_employees(
             allocation_status=e.allocation_status,
             status=e.status,
             top_skills=EmployeeService.top_skill_names(e),
+            updated_at=e.updated_at,
         )
         for e in rows
     ]
@@ -93,6 +94,33 @@ async def get_employee(
     emp = await svc.get(employee_id)
     svc.ensure_can_view(user, emp)
     return EmployeeResponse.model_validate(emp)
+
+
+@router.get(
+    "/{employee_id}/resume",
+    summary="Download the original resume PDF",
+)
+async def download_resume(
+    employee_id: UUID, user: CurrentUser, db: DbSession
+) -> Response:
+    svc = EmployeeService(db)
+    emp = await svc.get(employee_id)
+    svc.ensure_can_view(user, emp)
+
+    if not emp.resume_content:
+        from app.core.exceptions import NotFoundError
+
+        raise NotFoundError("No original resume file found for this profile")
+
+    filename = emp.resume_filename or f"resume-{emp.full_name}.pdf"
+    return Response(
+        content=emp.resume_content,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'inline; filename="{filename}"',
+            "Cache-Control": "no-cache",
+        },
+    )
 
 
 @router.patch(

@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 const STEPS = [
   { key: "upload", label: "Uploading resume…", ms: 700 },
   { key: "read", label: "Reading PDF…", ms: 600 },
-  { key: "extract", label: "Extracting skills with Gemini…", ms: 2000 },
+  { key: "extract", label: "Extracting skills with AI…", ms: 2000 },
   { key: "infer", label: "Inferring related skills…", ms: 1200 },
 ] as const;
 

@@ -88,7 +88,7 @@ export default function SearchPage() {
                 <SearchInput
                   hero
                   onSubmit={runSearch}
-                  busy={search.phase === "streaming"}
+                  busy={false}
                 />
                 <SearchHistory onPick={runSearch} />
               </motion.section>
@@ -140,6 +140,26 @@ export default function SearchPage() {
                           {alreadySaved ? "Saved" : "Save search"}
                         </Button>
                       )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          if (search.results.length === 0) return;
+                          const header = "Name,Headline,Location,Match Score,Reason\n";
+                          const rows = search.results.map(r => {
+                            return `"${r.name}","${r.headline ?? ""}","${r.location ?? ""}",${Math.round(r.match_score * 100)}%,"${r.reason.replace(/"/g, '""')}"`;
+                          }).join("\n");
+                          const blob = new Blob([header + rows], { type: "text/csv;charset=utf-8;" });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement("a");
+                          a.href = url;
+                          a.download = `search-results.csv`;
+                          a.click();
+                          URL.revokeObjectURL(url);
+                        }}
+                      >
+                        Export CSV
+                      </Button>
                       <Button variant="ghost" size="sm" onClick={clearSearch}>
                         Clear
                       </Button>

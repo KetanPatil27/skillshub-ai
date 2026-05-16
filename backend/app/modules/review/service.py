@@ -3,6 +3,7 @@ from uuid import UUID
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.exceptions import ConflictError, NotFoundError
 from app.modules.employees.models import Employee, ProfileStatus
@@ -19,6 +20,7 @@ class ReviewService:
         stmt = (
             select(ReviewQueueItem)
             .where(ReviewQueueItem.status == ReviewStatus.PENDING)
+            .options(selectinload(ReviewQueueItem.employee))
             .order_by(ReviewQueueItem.created_at.asc())
         )
         items = list((await self.db.execute(stmt)).scalars().all())

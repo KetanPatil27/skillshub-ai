@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { animate, motion } from "framer-motion";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -124,26 +125,50 @@ function StatTiles({ data }: { data: AnalyticsOverview }) {
   ];
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-      {tiles.map((t, i) => (
-        <motion.div
-          key={t.label}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.04 }}
-        >
-          <Card>
-            <CardContent className="space-y-1 p-4">
-              <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                {t.icon}
-                {t.label}
-              </div>
-              <div className="text-2xl font-semibold tabular-nums">{t.value}</div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      ))}
+      {tiles.map((t, i) => {
+        const numValue = typeof t.value === "string" ? parseInt(t.value.replace(/[^0-9.]/g, ""), 10) : t.value;
+        const isPercent = typeof t.value === "string" && t.value.includes("%");
+        
+        return (
+          <motion.div
+            key={t.label}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.04 }}
+          >
+            <Card>
+              <CardContent className="space-y-1 p-4">
+                <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                  {t.icon}
+                  {t.label}
+                </div>
+                <div className="text-2xl font-semibold tabular-nums">
+                  {isNaN(numValue) ? t.value : <AnimatedCounter value={numValue} isPercent={isPercent} />}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        );
+      })}
     </div>
   );
+}
+
+function AnimatedCounter({ value, isPercent }: { value: number; isPercent: boolean }) {
+  const [displayValue, setDisplayValue] = useState("0");
+
+  useEffect(() => {
+    const controls = animate(0, value, {
+      duration: 1.5,
+      ease: "easeOut",
+      onUpdate(val) {
+        setDisplayValue(Math.floor(val) + (isPercent ? "%" : ""));
+      },
+    });
+    return () => controls.stop?.();
+  }, [value, isPercent]);
+
+  return <span>{displayValue}</span>;
 }
 
 function Recommendations({ items }: { items: string[] }) {
